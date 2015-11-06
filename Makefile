@@ -150,13 +150,14 @@ homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed /mnt/projects/fiona/data/run
 		-m /mnt/projects/fiona/data/runx1.motif \
 		   /mnt/projects/fiona/data/ets1.motif \
 		   /mnt/projects/fiona/data/ebf.motif \
+		   /mnt/projects/fiona/data/gata3.motif \
 		-mbed homer/$*_peaks.runx1-motif.bed \
 		> $@.part
 	mv $@.part $@
 	cat homer/$*_peaks.runx1-motif.bed | grep -v "^track" | sort -k 1,1 -k2g,2g > homer/$*-peak-motifs.sorted.bed
 	
-homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv macs/%_summits.bed anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmpty/table.csv /mnt/projects/fiona/scripts/annotate-peaks-with-expression.R
-	Rscript /mnt/projects/fiona/scripts/annotate-peaks-with-expression.R --peak-file $(word 1, $^) --summit-file $(word 2, $^) --out-file $@.part
+homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv macs/%_summits.bed anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmpty/table.csv /mnt/projects/fiona/scripts/annotate-peaks.R
+	Rscript /mnt/projects/fiona/scripts/annotate-peaks.R --peak-file $(word 1, $^) --summit-file $(word 2, $^) --out-file $@.part
 	mv $@.part $@
 	
 motifs/%_motifs.homer: homer/%_peaks.ucsc.bed

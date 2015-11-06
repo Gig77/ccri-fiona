@@ -416,7 +416,7 @@ for ID, comparison : comparisons
 					   ("q"       <= """ + comparison.qLimit  + """) AND
 					   (("meanA"  >= """ + comparison.exprLimit + """) OR
 					   ( "meanB"  >= """ + comparison.exprLimit + """))
-					   ORDER  BY 1
+					   ORDER  BY "q", ABS("fc") DESC
 			""",
 			@name  = "degCalled_"+ID
 	)
@@ -920,8 +920,8 @@ for ID, comparison : comparisons
 		        "/mnt/projects/generic/data/msigdb5.0/c6.all.v5.0.symbols.gmt," + 
 		        "/mnt/projects/generic/data/msigdb5.0/c7.all.v5.0.symbols.gmt," + 
 		        "/mnt/projects/generic/data/msigdb5.0/h.all.v5.0.symbols.gmt," +
-		        "/mnt/projects/generic/data/laurenti_2013_hematopoietic_lineages.gmt," + 
-		        "/mnt/projects/fiona/data/gsea_custom_gene_sets.gmt", 
+		        "/mnt/projects/generic/data/ccri/ccri_custom_gene_sets.gmt," +
+		        "/mnt/projects/generic/data/laurenti_2013_hematopoietic_lineages.gmt", 
 		options = "-nperm " + permutations + " -set_max " + maxSetSize[category] + " -set_min " + minSetSize[category],
 		@memory  = 7000,
 		@cpu     = 2, 			

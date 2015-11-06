@@ -45,6 +45,9 @@ peaks$'ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs' <- ifelse(is.n
 peaks <- convertMotifDist('EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer Distance From Peak(sequence,strand,conservation)')
 peaks$'EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs' <- ifelse(is.na(peaks$'EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer Distance From Peak(sequence,strand,conservation)'), NA, sapply(strsplit(peaks$'EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer Distance From Peak(sequence,strand,conservation)', ","), length))
 
+peaks <- convertMotifDist('GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)')
+peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer No. motifs' <- ifelse(is.na(peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)'), NA, sapply(strsplit(peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)', ","), length))
+
 names(peaks) <- gsub("Distance From Peak(sequence,strand,conservation)", "Distance From Summit", names(peaks), fixed=T)
   
 
@@ -52,19 +55,33 @@ names(peaks) <- gsub("Distance From Peak(sequence,strand,conservation)", "Distan
 # ER vs. empty
 
 ERvsEmpty <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv")
-ERvsEmpty <- ERvsEmpty[!is.na(ERvsEmpty$Gene),c("Gene", "fc", "qValue")]
-ERvsEmpty <- ERvsEmpty[order(ERvsEmpty$qValue),]
+ERvsEmpty <- ERvsEmpty[!is.na(ERvsEmpty$Gene),c("Gene", "fc", "q")]
+ERvsEmpty <- ERvsEmpty[order(ERvsEmpty$q),]
 ERvsEmpty <- ERvsEmpty[!duplicated(ERvsEmpty$Gene),]
 names(ERvsEmpty) <- c("Gene", "fcERvsEmpty", "qERvsEmpty")
 peaks.ann <- merge(peaks, ERvsEmpty, by.x = "Gene Name", by.y = "Gene", all.x = T)
 
 # RHD vs. empty
 RHDvsEmpty <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeRHDvsEmpty/table.csv")
-RHDvsEmpty <- RHDvsEmpty[!is.na(RHDvsEmpty$Gene),c("Gene", "fc", "qValue")]
-RHDvsEmpty <- RHDvsEmpty[order(RHDvsEmpty$qValue),]
+RHDvsEmpty <- RHDvsEmpty[!is.na(RHDvsEmpty$Gene),c("Gene", "fc", "q")]
+RHDvsEmpty <- RHDvsEmpty[order(RHDvsEmpty$q),]
 RHDvsEmpty <- RHDvsEmpty[!duplicated(RHDvsEmpty$Gene),]
 names(RHDvsEmpty) <- c("Gene", "fcRHDvsEmpty", "qRHDvsEmpty")
 peaks.ann <- merge(peaks.ann, RHDvsEmpty, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+# annotate enhancers
+library(GenomicRanges)
+peaks.gr <- GRanges(seqnames=peaks.ann$Chr, ranges=IRanges(start=peaks.ann$summit_pos, end=peaks.ann$summit_pos), peak=peaks.ann[,2])
+
+peaks.ann$overlaps_enhancer_in_celllines <- NA
+celllines <- c("Gm12878", "H1hesc", "Helas3", "Hepg2", "Huvec", "K562")
+for (cl in celllines) {
+  segmentation.bed <- read.delim(paste0("/mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombined", cl, ".bed"), header = F, stringsAsFactors = F)
+  segmentation.bed <- segmentation.bed[segmentation.bed$V4 %in% c("E"),] # we are only interested in enhancers here
+  segmentation.gr <- GRanges(seqnames=segmentation.bed$V1, ranges=IRanges(start=segmentation.bed$V2, end=segmentation.bed$V3))
+  o <- findOverlaps(peaks.gr, segmentation.gr)
+  peaks.ann$overlaps_enhancer_in_celllines[o@queryHits] <- ifelse(is.na(peaks.ann$overlaps_enhancer_in_celllines[o@queryHits]), cl, paste(peaks.ann$overlaps_enhancer_in_celllines[o@queryHits], cl, sep=","))
+}
 
 # sort and write output
 peaks.ann <- peaks.ann[order(peaks.ann$'Peak Score', decreasing = T),]
