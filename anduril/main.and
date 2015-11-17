@@ -177,7 +177,7 @@ experimentReport = experimentalSetupReport
 	samples      = inputSamples,
 	sampleGroups = sampleGroups,
 	comparisons  = inputComparisons,
-	sampleTableColumns = "ID,Alias,Batch,Description,RNA_by,File",
+	sampleTableColumns = "ID,Alias,HarvestDay,Description,RNA_by,File",
 	sampleTableFormat  = "ccclcl"
 )
 
@@ -218,11 +218,17 @@ for sample, bam : alignedBams
 	(
 		var1 = bam,
 		var2 = gtfNorRNA.optOut1,
-		script = "htseq-count -f bam -t exon -s no @var1@ @var2@ | grep -v '^__' > @optOut1@",
+		script = "htseq-count -f bam -t exon -s no @var1@ @var2@ > @optOut1@",
 		@name = "htseq_" + sample
 	)
 	bamCounts[sample] = count.optOut1
 }
+
+htseqExprMatrix = HTSeqExprMatrix
+(
+	samples      = Array2CSV(array=bamCounts, @name="htseq_filelist"),
+	inclusionKey = ""
+)
 
 deseqExprMatrix = DESeqExpr
 (
@@ -240,14 +246,18 @@ include "/mnt/projects/iamp/scripts/anduril/qc.and"
 
 qcReport  = getQCReport
 (
-	alignedBAMs = alignedBams,
-    gtf = gtfCustom.optOut1,
-    counts = bamCounts,
-    force expr   = deseqExprMatrix.expr,
-    force groups = sampleGroups,
+	alignedBAMs            = alignedBams,
+    gtf                    = gtfCustom.optOut1,
+    countMatrix            = htseqExprMatrix.countArray["all"],
+    force expr             = deseqExprMatrix.expr,
+    force groups           = sampleGroups,
+    force samples          = inputSamples,
     readStatsSamplesPerRow = 6,
-    readStatsYMax = 60
+    readStatsYMax          = 60,
+    batch1                 = "HarvestDay",
+    covariate1             = "MainGroup"
 )
+
 
 nvcs = record()
 for sample, bam : alignedBams 
@@ -360,14 +370,14 @@ for ID, comparison : comparisons
 {
 	deseq = DESeq2
 	(
+		countMatrix             = htseqExprMatrix.countArray["all"],
 		samples                 = inputSamples,
 		force sampleGroups      = sampleGroups,
-		design                  = "~ Batch + group",
-		counts                  = bamCounts,
-	    controlGroup            = comparison.controlG,
 	    caseGroup               = comparison.caseG,
+	    controlGroup            = comparison.controlG,
 	    otherGroups             = comparison.otherG,
-	    label                   = ID,
+		design                  = "~ HarvestDay + group",
+	    colSuffix               = ID,
 	    minReplicatesForReplace = 7,
 	    @name                   = "deseq_" + ID
 	)
@@ -670,6 +680,23 @@ include "/mnt/projects/helena_veronika/scripts/anduril/venn.and"
 
 vennSetsExpanded = ExpandCollapse(relation=venn.sets)
 
+// --- oeERvsEmpty and NOT oeRHDvsEmpty
+
+vennSetTableReport_oeERvsEmpty_AND_NOT_oeRHDvsEmpty = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmpty_AND_NOT_oeRHDvsEmpty_AND_oeERvsRHD", "oeERvsEmpty_AND_NOT_oeRHDvsEmpty_AND_NOT_oeERvsRHD"},
+	outputComparisons  = {"oeERvsEmpty", "oeRHDvsEmpty"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "oeERvsEmpty but not oeRHDvsEmpty",
+	sectionType        = "subsubsection",
+	orderBy            = "oeERvsEmpty",
+	caption            = "These genes were found to be significantly differentially expressed in comparison " + comparisons["oeERvsEmpty"].desc + " (set 'A') but not in comparison " + comparisons["oeRHDvsEmpty"].desc + " (set 'B'). " +
+	                     "These genes are putative direct targets of ETV6/RUNX1. Genes sorted by column 'q(A)'."
+)
+degReportLst["vennSetTableReport_oeERvsEmpty_AND_NOT_oeRHDvsEmpty"] = vennSetTableReport_oeERvsEmpty_AND_NOT_oeRHDvsEmpty.report
+
 // --- intersection oeERvsEmpty and oeRHDvsEmpty
 
 vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty = VennSetTableReport
@@ -677,7 +704,7 @@ vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty = VennSetTableReport
 	vennSetData        = vennSetsExpanded,
 	vennSetNames       = {"oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD", "oeERvsEmpty_AND_oeRHDvsEmpty_AND_NOT_oeERvsRHD"},
 	outputComparisons  = {"oeERvsEmpty", "oeRHDvsEmpty"},
-	degs               = degCalledLst,
+	degs               = degAllLst,
 	geneAnnot          = geneAnnot,
 	section            = "Intersection oeERvsEmpty and oeRHDvsEmpty",
 	sectionType        = "subsubsection",
@@ -693,7 +720,7 @@ vennSetTableReport_oeERvsEmpty_AND_oeERvsRHD = VennSetTableReport
 	vennSetData        = vennSetsExpanded,
 	vennSetNames       = {"oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD", "oeERvsEmpty_AND_NOT_oeRHDvsEmpty_AND_oeERvsRHD"},
 	outputComparisons  = {"oeERvsEmpty", "oeERvsRHD"},
-	degs               = degCalledLst,
+	degs               = degAllLst,
 	geneAnnot          = geneAnnot,
 	section            = "Intersection oeERvsEmpty and oeERvsRHD",
 	sectionType        = "subsubsection",
@@ -709,7 +736,7 @@ vennSetTableReport_oeRHDvsEmpty_AND_oeERvsRHD = VennSetTableReport
 	vennSetData        = vennSetsExpanded,
 	vennSetNames       = {"oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD", "NOT_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD"},
 	outputComparisons  = {"oeRHDvsEmpty", "oeERvsRHD"},
-	degs               = degCalledLst,
+	degs               = degAllLst,
 	geneAnnot          = geneAnnot,
 	section            = "Intersection oeRHDvsEmpty and oeERvsRHD",
 	sectionType        = "subsubsection",
@@ -725,7 +752,7 @@ vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD = VennSetTableRepo
 	vennSetData        = vennSetsExpanded,
 	vennSetNames       = {"oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD"},
 	outputComparisons  = {"oeERvsEmpty", "oeRHDvsEmpty", "oeERvsRHD"},
-	degs               = degCalledLst,
+	degs               = degAllLst,
 	geneAnnot          = geneAnnot,
 	section            = "Intersection oeERvsEmpty, oeRHDvsEmpty, oeERvsRHD",
 	sectionType        = "subsubsection",
