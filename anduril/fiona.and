@@ -147,7 +147,7 @@ for comparison : std.itercsv(inputComparisons)
 		columnOut = "Sample",
 		isList    = true,
 		regexp1   = "ID=(" + gCase + "|" + gControl + ")",
-		@name     = "sampleIds_" + comparison.ID
+		@name     = "sampleIds_" + std.quote(comparison.ID, type="Anduril")
 	)
 
 	// add group record	
@@ -170,7 +170,7 @@ for comparison : std.itercsv(inputComparisons)
 //--- EXPERIMENTAL SETUP REPORT
 //------------------------------------------------------------------------------------------------
 
-include "/mnt/projects/iamp/scripts/anduril/experimentalSetup.and"
+include "/mnt/projects/fiona/anduril/includes/experimentalSetup.and"
 
 experimentReport = experimentalSetupReport
 (
@@ -218,7 +218,7 @@ for sample, bam : alignedBams
 	(
 		var1 = bam,
 		var2 = gtfNorRNA.optOut1,
-		script = "htseq-count -f bam -t exon -s no @var1@ @var2@ > @optOut1@",
+		script = "htseq-count -f bam -t exon -s no @var1@ @var2@ > @optOut1@.part && mv @optOut1@.part @optOut1@",
 		@name = "htseq_" + sample
 	)
 	bamCounts[sample] = count.optOut1
@@ -242,16 +242,17 @@ deseqExprMatrix = DESeqExpr
 //--- QUALITY CONTROL
 //------------------------------------------------------------------------------------------------
 
-include "/mnt/projects/iamp/scripts/anduril/qc.and"
+include "/mnt/projects/fiona/anduril/includes/qc.and"
 
 qcReport  = getQCReport
 (
+	samples                = samples,
 	alignedBAMs            = alignedBams,
     gtf                    = gtfCustom.optOut1,
     countMatrix            = htseqExprMatrix.countArray["all"],
     force expr             = deseqExprMatrix.expr,
     force groups           = sampleGroups,
-    force samples          = inputSamples,
+    force inputSamples     = inputSamples,
     readStatsSamplesPerRow = 6,
     readStatsYMax          = 60,
     batch1                 = "HarvestDay",
@@ -379,7 +380,7 @@ for ID, comparison : comparisons
 		design                  = "~ HarvestDay + group",
 	    colSuffix               = ID,
 	    minReplicatesForReplace = 7,
-	    @name                   = "deseq_" + ID
+	    @name                   = "deseq_" + std.quote(ID, type="Anduril")
 	)
 	degAllLst[ID] = deseq.results
 
@@ -408,9 +409,9 @@ for ID, comparison : comparisons
 			FROM table1 G
 				LEFT OUTER JOIN table2 AS A ON (G."ids" = A."Ensembl")
 				LEFT OUTER JOIN table3 AS D ON (G."ids" = D."Ensembl Gene ID")
-			ORDER  BY "q", ABS("fc") DESC
+			ORDER BY ABS("fc") DESC, "q"
 		''',
-		@name  = "deseqAnnotated_"+ID
+		@name  = "deseqAnnotated_" + std.quote(ID, type="Anduril")
 	)
 		
 	// subset statistically significant DEGs
@@ -426,9 +427,9 @@ for ID, comparison : comparisons
 					   ("q"       <= """ + comparison.qLimit  + """) AND
 					   (("meanA"  >= """ + comparison.exprLimit + """) OR
 					   ( "meanB"  >= """ + comparison.exprLimit + """))
-					   ORDER  BY "q", ABS("fc") DESC
+					   ORDER BY ABS("fc") DESC, "q"
 			""",
-			@name  = "degCalled_"+ID
+			@name  = "degCalled_" + std.quote(ID, type="Anduril")
 	)
 	degCalledLst[ID] = degCalled.table	
 }
@@ -437,11 +438,11 @@ for ID, comparison : comparisons
 //--- DEG REPORTS
 //------------------------------------------------------------------------------------------------
 
-include "/mnt/projects/iamp/scripts/anduril/degTable.and"
-include "/mnt/projects/iamp/scripts/anduril/degBoxPlot.and"
-include "/mnt/projects/iamp/scripts/anduril/goClustering.and"
-include "/mnt/projects/iamp/scripts/anduril/goEnrichment.and"
-include "/mnt/projects/iamp/scripts/anduril/expressionHeatmap.and"
+include "/mnt/projects/fiona/anduril/includes/degTable.and"
+include "/mnt/projects/fiona/anduril/includes/degBoxPlot.and"
+include "/mnt/projects/fiona/anduril/includes/goClustering.and"
+include "/mnt/projects/fiona/anduril/includes/goEnrichment.and"
+include "/mnt/projects/fiona/anduril/includes/expressionHeatmap.and"
 
 degReportLst = record()
 deseqColumnTypes = StringInput(content="Table\tColumn\tType\ntable1\tfc\tDOUBLE\ntable1\tstatus\tINTEGER\n")  // required if degTable is empty (= no significant DEGs)
@@ -463,7 +464,7 @@ for ID, comparison : comparisons
 		caption = "Scatter plot of log2 fold-changes vs. p-values (aka 'volcano plot') comparing gene expression between " + comparison.caseG + " and " + comparison.controlG + " samples.",
 		sectionTitle="Volcano plot " + ID,
 		sectionType="subsubsection",
-		@name = "degVolcanoPlot_" + ID
+		@name = "degVolcanoPlot_" + std.quote(ID, type="Anduril")
 	)
 
 	//--- TABLES WITH UP- AND DOWN-REULATED GENES --------------------------------------------------------------------------//
@@ -477,7 +478,7 @@ for ID, comparison : comparisons
 		ID=ID,
 		section="Genes with higher expression in "+comparison.caseG+" than "+comparison.controlG+" samples",
 		sectionType="subsubsection",
-		@name = "degTableUp_"+ID
+		@name = "degTableUp_" + std.quote(ID, type="Anduril")
 	)
 
 	degTableDn = getDEGTableReport
@@ -489,7 +490,7 @@ for ID, comparison : comparisons
 		ID=ID,
 		section="Genes with lower expression in "+comparison.caseG+" than "+comparison.controlG+" samples",
 		sectionType="subsubsection",
-		@name = "degTableDn_"+ID
+		@name = "degTableDn_" + std.quote(ID, type="Anduril")
 	)
 
 	//--- BOX PLOTS TOP UP- AND DOWN-REGULATED GENES ----------------------------------------------------------------------//
@@ -505,7 +506,7 @@ for ID, comparison : comparisons
 		labelOutliers=false,
 		cexGroupLabel=0.8,
 		sectionType="subsubsection",
-		@name = "degBoxplotUp_"+ID
+		@name = "degBoxplotUp_" + std.quote(ID, type="Anduril")
 	)
 
 	degBoxplotDn = getDEGBoxPlots
@@ -519,7 +520,7 @@ for ID, comparison : comparisons
 		labelOutliers=false,
 		cexGroupLabel=0.8,
 		sectionType="subsubsection",
-		@name = "degBoxplotDn_"+ID
+		@name = "degBoxplotDn_" + std.quote(ID, type="Anduril")
 	)
 
 	//--- EXPRESSION HEATMAP --------------------------------------------------------------------------//
@@ -531,7 +532,7 @@ for ID, comparison : comparisons
 		includeColumns = comparison.sampleIdLst,
 		includeColumns = "RowName",
 		colOrder       = true,
-		@name          = "exprMatrix_"+ID
+		@name          = "exprMatrix_" + std.quote(ID, type="Anduril")
 	)                      
 
 	exprHeatmap = getHeatmapReport
@@ -540,7 +541,7 @@ for ID, comparison : comparisons
 		geneNames = geneNames,
 		group = comparison,
 		sectionType="subsubsection",
-		@name = "heatmap"+ID
+		@name = "heatmap" + std.quote(ID, type="Anduril")
 	)
 
 	//--- GO ENRICHMENT -------------------------------------------------------------------------------//
@@ -555,7 +556,7 @@ for ID, comparison : comparisons
 		ID           = ID,
 		sectionTitle = "GO terms enriched in DEGs between " + comparison.caseG + " and " + comparison.controlG,
 		sectionType  = "subsubsection",
-		@name        = "goEnrichment"+ID
+		@name        = "goEnrichment" + std.quote(ID, type="Anduril")
 	)
 
 	//--- GENE INTERACTION NETWORK --------------------------------------------------------------------//
@@ -584,7 +585,7 @@ for ID, comparison : comparisons
 			FROM   table2 T2 LEFT JOIN table1 T1 ON T2."ids" = T1."ids" 
 			WHERE  T1."ids" IS NULL AND T2."meanExpr'''+ID+'''" < 10
             ''',
-		@name    = "statusTable_"+ID,
+		@name    = "statusTable_" + std.quote(ID, type="Anduril"),
 		@enabled = runNetwork
 	)
 	
@@ -629,7 +630,7 @@ for ID, comparison : comparisons
 		expand            = "connected",
 		statusFilter      = "NA",
 		sectionType       = "subsubsection",
-		@name             = "network_"+ID,
+		@name             = "network_" + std.quote(ID, type="Anduril"),
 		@enabled          = true
 	)
 	
@@ -676,7 +677,7 @@ degReportLst["venn"] = venn.report
 //--- VENN SETS
 //------------------------------------------------------------------------------------------------
 
-include "/mnt/projects/helena_veronika/scripts/anduril/venn.and"
+include "/mnt/projects/fiona/anduril/includes/venn.and"
 
 vennSetsExpanded = ExpandCollapse(relation=venn.sets)
 
@@ -709,7 +710,7 @@ vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty = VennSetTableReport
 	section            = "Intersection oeERvsEmpty and oeRHDvsEmpty",
 	sectionType        = "subsubsection",
 	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsEmpty"].desc + " (set 'A') and " + comparisons["oeRHDvsEmpty"].desc + " (set 'B'). " +
-	                     "Genes sorted by average q-value from most to least significant."
+	                     "Genes sorted by average FC from largest to smallest."
 )
 degReportLst["vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty"] = vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty.report
 
@@ -725,7 +726,7 @@ vennSetTableReport_oeERvsEmpty_AND_oeERvsRHD = VennSetTableReport
 	section            = "Intersection oeERvsEmpty and oeERvsRHD",
 	sectionType        = "subsubsection",
 	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsEmpty"].desc + " (set 'A') and " + comparisons["oeERvsRHD"].desc + " (set 'B'). " +
-	                     "Genes sorted by average q-value from most to least significant."
+	                     "Genes sorted by average FC from largest to smallest."
 )
 degReportLst["vennSetTableReport_oeERvsEmpty_AND_oeERvsRHD"] = vennSetTableReport_oeERvsEmpty_AND_oeERvsRHD.report
 
@@ -741,7 +742,7 @@ vennSetTableReport_oeRHDvsEmpty_AND_oeERvsRHD = VennSetTableReport
 	section            = "Intersection oeRHDvsEmpty and oeERvsRHD",
 	sectionType        = "subsubsection",
 	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeRHDvsEmpty"].desc + " (set 'A') and " + comparisons["oeERvsRHD"].desc + " (set 'B'). " +
-	                     "Genes sorted by average q-value from most to least significant."
+	                     "Genes sorted by average FC from largest to smallest."
 )
 degReportLst["vennSetTableReport_oeRHDvsEmpty_AND_oeERvsRHD"] = vennSetTableReport_oeRHDvsEmpty_AND_oeERvsRHD.report
 
@@ -758,7 +759,7 @@ vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD = VennSetTableRepo
 	sectionType        = "subsubsection",
 	caption            = "These genes were found to be significantly differentially expressed in all three comparisons, including " + comparisons["oeERvsEmpty"].desc + " (set 'A'), " + 
 	                     comparisons["oeRHDvsEmpty"].desc + " (set 'B'), and " + comparisons["oeERvsRHD"].desc + " (set 'C'). " +
-	                     "Genes sorted by average q-value from most to least significant."
+	                     "Genes sorted by average FC from largest to smallest."
 )
 degReportLst["vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD"] = vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD.report
 
@@ -798,7 +799,7 @@ boxplotSelectedGenes = LatexCombiner
 //--- POSITIONAL GENE ENRICHMENT
 //------------------------------------------------------------------------------------------------
 
-include "/mnt/projects/iamp/scripts/anduril/pgeReport.and"
+include "/mnt/projects/fiona/anduril/includes/pgeReport.and"
 
 pgeReportLst = record()
 for comparison : std.itercsv(inputComparisons) {
@@ -810,7 +811,7 @@ for comparison : std.itercsv(inputComparisons) {
 		title=comparison.ID,
 		pvalue=0.01,
 		includeHeader=std.length(pgeReportLst)==0,
-		@name="pge_"+comparison.ID
+		@name="pge_" + std.quote(comparison.ID, type="Anduril")
 	)
 }
 	
@@ -877,7 +878,7 @@ OUTPUT(combinedPDF.document)
 //--- EXCEL FILES WITH DIFFERENTIALLY EXPRESSED GENES
 //------------------------------------------------------------------------------------------------
 
-include "/mnt/projects/iamp/scripts/anduril/degExcel.and"
+include "/mnt/projects/fiona/anduril/includes/degExcel.and"
 
 degExcel = degExcelOutput
 (
@@ -899,7 +900,7 @@ OUTPUT(degExcel.allGenes)
 //------------------------------------------------------------------------------------------------
 //--- GENE SET ENRICHMENT ANALYSIS (GSEA)
 //------------------------------------------------------------------------------------------------
-include "/mnt/projects/sarah/scripts/anduril/gsea.and"
+include "/mnt/projects/fiona/anduril/includes/gsea.and"
 
 // produce RNK files for each comparison
 
@@ -912,7 +913,7 @@ for ID, comparison : comparisons
 		annotation = geneNames,
 		colP = "p" + ID,
 		colFC= "fc" + ID,
-		@name = "rnk_" + ID,
+		@name = "rnk_" + std.quote(ID, type="Anduril"),
 		@enabled = runGSEA
 	)
 }
@@ -952,7 +953,7 @@ for ID, comparison : comparisons
 		options = "-nperm " + permutations + " -set_max " + maxSetSize[category] + " -set_min " + minSetSize[category],
 		@memory  = 7000,
 		@cpu     = 2, 			
-		@name = "gseaMSigDB_" + ID,
+		@name = "gseaMSigDB_" + std.quote(ID, type="Anduril"),
 		@enabled = runGSEA
 	)
 	enrichedUp[category][ID] = gseaMSigDB.enrichedUp
@@ -978,7 +979,7 @@ for ID, comparison : comparisons
 		options = "-nperm " + permutations + " -set_max " + maxSetSize[category] + " -set_min " + minSetSize[category],
 		@memory  = 7000,
 		@cpu     = 2, 			
-		@name = "gseaGeneSigDB_" + ID,
+		@name = "gseaGeneSigDB_" + std.quote(ID, type="Anduril"),
 		@enabled = runGSEA
 	)
 	enrichedUp[category][ID] = gseaGeneSigDB.enrichedUp
@@ -1004,7 +1005,7 @@ for ID, comparison : comparisons
 		options = "-nperm " + permutations + " -set_max " + maxSetSize[category] + " -set_min " + minSetSize[category],
 		@memory  = 7000,
 		@cpu     = 2, 			
-		@name = "gseaDSigDB_" + ID,
+		@name = "gseaDSigDB_" + std.quote(ID, type="Anduril"),
 		@enabled = runGSEA
 	)
 	enrichedUp[category][ID] = gseaDSigDB.enrichedUp
@@ -1033,7 +1034,7 @@ for ID, comparison : comparisons
 		options = "-nperm " + permutations + " -set_max " + maxSetSize[category] + " -set_min " + minSetSize[category],
 		@memory  = 7000,
 		@cpu     = 2, 			
-		@name = "gseaTFTargets_" + ID,
+		@name = "gseaTFTargets_" + std.quote(ID, type="Anduril"),
 		@enabled = runGSEA
 	)
 	enrichedUp[category][ID] = gseaTFTargets.enrichedUp
