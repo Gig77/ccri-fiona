@@ -13,7 +13,6 @@ runNetwork = true
 //--- INPUT DATA
 //------------------------------------------------------------------------------------------------
 
-inputBamDir       = INPUT(path="/mnt/projects/fiona/data/bam", recursive=false)
 inputSamples      = INPUT(path="/mnt/projects/fiona/data/samples.csv")
 inputSampleGroups = INPUT(path="/mnt/projects/fiona/data/sample_groups.csv")
 inputComparisons  = INPUT(path="/mnt/projects/fiona/data/comparisons.csv")
@@ -43,7 +42,6 @@ hyperlinkRuleEnsemblGeneCards = StringInput(content=
 //--- PRELUDE
 //------------------------------------------------------------------------------------------------
 
-inputBamFiles = Folder2Array(folder1 = inputBamDir, filePattern = "^(32232|32233|32234|32235|32236|32237)_.*[.]bam$")
 moksiskaanInit = MoksiskaanInit(showLog='EnsemblImport,PathwayCommonsImport,PINAImport,WikiPathways')
 ensemblRef = XrefLinkRule(moksiskaan = moksiskaanInit.connection, columns = "Ensembl=Ensembl", xrefTypes  = XrefType_Ensembl_gene)
 
@@ -92,6 +90,7 @@ for entry : std.itercsv(inputSamples)
 	{
 		'alias' = entry.Alias,
 		'description' = entry.Description,
+		'file' = entry.File,
 		'exclude' = false
 	}
 	
@@ -186,23 +185,23 @@ experimentReport = experimentalSetupReport
 //------------------------------------------------------------------------------------------------
 
 alignedBams = record()
-for bam : std.iterArray(inputBamFiles) 
+for id, sample : samples 
 {
-	alias = samples[bam.key+""].alias
-	@out.alignment.filename = alias + '.gsnap.sorted.dupmarked.bam'
+	@out.alignment.filename = sample.alias + '.gsnap.sorted.dupmarked.bam'
 	gsnap = GSNAP
 	(
-		reads    = INPUT(path=bam.file), 
-		options  = "--db=g1k_v37_etv6runx1 --dir=/data_synology/anduril/docker-images/anduril-gsnap_2014_12_28-human_g1k_v37/db/human_g1k_v37 --use-splicing=g1k_v37.splicesites --use-snps=g1k_v37.snp138 --nthreads 15 --maxsearch=100 --npaths=1 --max-mismatches=1 --novelsplicing=0 --batch=4 --genome-unk-mismatch=0",
-		docker   = "biowaste:5000/anduril/gsnap",
-		@cpu     = 10, 
-		@memory  = 40000,
-		@name    = "gsnap_" + alias,
-		@execute = "once" 
+		reads     = INPUT(path=sample.file), 
+		options   = "--db=g1k_v37_etv6runx1 --dir=/data_synology/anduril/docker-images/anduril-gsnap_2014_12_28-human_g1k_v37/db/human_g1k_v37 --use-splicing=g1k_v37.splicesites --use-snps=g1k_v37.snp138 --nthreads 15 --maxsearch=100 --npaths=1 --max-mismatches=1 --novelsplicing=0 --batch=4 --genome-unk-mismatch=0",
+		docker    = "biowaste:5000/anduril/gsnap",
+		inputType = "auto",
+		@cpu      = 10, 
+		@memory   = 40000,
+		@name     = "gsnap_" + sample.alias,
+		@execute  = "once" 
 	)
 
-	if (!samples[bam.key+""].exclude) {
-		alignedBams[alias] = gsnap.alignment
+	if (!sample.exclude) {
+		alignedBams[sample.alias] = gsnap.alignment
 	}
 }
 
@@ -694,7 +693,7 @@ vennSetTableReport_oeERvsEmpty_AND_NOT_oeRHDvsEmpty = VennSetTableReport
 	sectionType        = "subsubsection",
 	orderBy            = "oeERvsEmpty",
 	caption            = "These genes were found to be significantly differentially expressed in comparison " + comparisons["oeERvsEmpty"].desc + " (set 'A') but not in comparison " + comparisons["oeRHDvsEmpty"].desc + " (set 'B'). " +
-	                     "These genes are putative direct targets of ETV6/RUNX1. Genes sorted by column 'q(A)'."
+	                     "These genes are putative direct targets of ETV6/RUNX1. Genes sorted by column 'fc(A)'."
 )
 degReportLst["vennSetTableReport_oeERvsEmpty_AND_NOT_oeRHDvsEmpty"] = vennSetTableReport_oeERvsEmpty_AND_NOT_oeRHDvsEmpty.report
 
