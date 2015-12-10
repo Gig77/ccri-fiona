@@ -529,7 +529,7 @@ for ID, comparison : comparisons
 		exprMatrix   = deseqExprMatrix.expr,
 		degCalled    = degCalledLst[ID],
 		geneNames    = geneNames,
-		sampleGroups = inputSampleGroups,
+		sampleGroups = sampleGroups,
 		comparison   = comparison,
 		sectionType  = "subsubsection",
 		@name        = "heatmap" + std.quote(ID, type="Anduril")
