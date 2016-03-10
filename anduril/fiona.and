@@ -9,6 +9,7 @@ authors = "Christian Frech and Marko Laakso"
 runGSEA = false
 runNetwork = true
 runKegg = true
+fastQC = false
 
 //------------------------------------------------------------------------------------------------
 //--- INPUT DATA
@@ -122,6 +123,7 @@ removeExcludedSamples = REvaluate
 	''')
 )
 sampleGroups = removeExcludedSamples.table
+sampleGroupsSimple = CSVFilter(csv=sampleGroups, regexp="ID=oe-ER-72h|oe-RHD-72h|oe-empty-72h")
 
 //------------------------------------------------------------------------------------------------
 //--- COMPARISONS
@@ -158,6 +160,7 @@ for comparison : std.itercsv(inputComparisons)
 		'otherG'      = comparison.NonMembers,
 		'sampleIdLst' = sampleIdLst.ids,
 		'sampleIds'   = std.strReplace(std.fRead(sampleIdLst.ids), "\n", ",", "^[^,]+,(.*)", "$1", ",$", ""),
+		'design'      = comparison.design,
 		'fcLimit'     = comparison.fcLimit,
 		'pLimit'      = comparison.pLimit,
 		'qLimit'      = comparison.qLimit,
@@ -235,7 +238,8 @@ deseqExprMatrix = DESeqExpr
 	geneCounts  = bamCounts,
     counts      = false,
     maxNA       = 0.9,
-    normalized  = true
+    normalized  = true,
+    add1        = true
 )
 
 //------------------------------------------------------------------------------------------------
@@ -250,13 +254,16 @@ qcReport  = getQCReport
 	alignedBAMs            = alignedBams,
     gtf                    = gtfCustom.optOut1,
     countMatrix            = htseqExprMatrix.countArray["all"],
-    force expr             = deseqExprMatrix.expr,
-    force groups           = sampleGroups,
+    force expr             = deseqExprMatrix.log2,
+    force groups           = sampleGroupsSimple,
     force inputSamples     = inputSamples,
     readStatsSamplesPerRow = 6,
     readStatsYMax          = 60,
+    cexMDS                 = 1,
+    cexClusterHeatmap      = 1,
     batch1                 = "HarvestDay",
-    covariate1             = "MainGroup"
+    covariate1             = "MainGroup",
+    includeFastQC          = fastQC
 )
 
 
@@ -377,7 +384,7 @@ for ID, comparison : comparisons
 	    caseGroup               = comparison.caseG,
 	    controlGroup            = comparison.controlG,
 	    otherGroups             = comparison.otherG,
-		design                  = "~ HarvestDay + group",
+		design                  = comparison.design,
 	    colSuffix               = ID,
 	    minReplicatesForReplace = 7,
 	    @name                   = "deseq_" + std.quote(ID, type="Anduril")
@@ -498,7 +505,7 @@ for ID, comparison : comparisons
 	degBoxplotUp = getDEGBoxPlots
 	(
 		degs = degCalledLst[ID],
-		exprMatrix = deseqExprMatrix.expr,
+		exprMatrix = deseqExprMatrix.log2,
 		force sampleGroups=sampleGroups,
 		geneAnnot=geneAnnot,
 		direction="up",
@@ -512,7 +519,7 @@ for ID, comparison : comparisons
 	degBoxplotDn = getDEGBoxPlots
 	(
 		degs = degCalledLst[ID],
-		exprMatrix = deseqExprMatrix.expr,
+		exprMatrix = deseqExprMatrix.log2,
 		force sampleGroups=sampleGroups,
 		geneAnnot=geneAnnot,
 		direction="down",
@@ -527,12 +534,13 @@ for ID, comparison : comparisons
 
 	exprHeatmap = getHeatmapReport
 	(
-		exprMatrix   = deseqExprMatrix.expr,
+		exprMatrix   = deseqExprMatrix.log2,
 		degCalled    = degCalledLst[ID],
 		geneNames    = geneNames,
 		sampleGroups = sampleGroups,
 		comparison   = comparison,
 		sectionType  = "subsubsection",
+		fontSizeCol  = 10,
 		@name        = "heatmap" + std.quote(ID, type="Anduril")
 	)
 
@@ -676,12 +684,13 @@ venn = VennDiagram
 	cexSetName   = 0.3,
 	cexSetSize   = 0.3,
 	doWeights    = true,
-	sets1        = "oeERvsEmpty,oeRHDvsEmpty,oeERvsRHD",
+	sets1        = "oeERvsEmptyB1,oeRHDvsEmptyB1,oeERvsRHDB1",
+	sets2        = "oeERvsEmptyB2,oeRHDvsEmptyB2,oeERvsRHDB2",
+	sets3        = "oeERvsEmpty,oeRHDvsEmpty,oeERvsRHD",
 	sectionTitle = "Gene set comparisons",
 	sectionType  = "subsection",
 	types        = "circles"
 )
-
 degReportLst["venn"] = venn.report
 
 //------------------------------------------------------------------------------------------------
@@ -691,6 +700,176 @@ degReportLst["venn"] = venn.report
 include "/mnt/projects/fiona/anduril/includes/venn.and"
 
 vennSetsExpanded = ExpandCollapse(relation=venn.sets)
+
+// === batch 1 ===
+
+// --- oeERvsEmptyB1 and NOT oeRHDvsEmptyB1
+
+vennSetTableReport_oeERvsEmptyB1_AND_NOT_oeRHDvsEmptyB1 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB1_AND_NOT_oeRHDvsEmptyB1_AND_oeERvsRHDB1", "oeERvsEmptyB1_AND_NOT_oeRHDvsEmptyB1_AND_NOT_oeERvsRHDB1"},
+	outputComparisons  = {"oeERvsEmptyB1", "oeRHDvsEmptyB1"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "oeERvsEmptyB1 but not oeRHDvsEmptyB1",
+	sectionType        = "subsubsection",
+	orderBy            = "oeERvsEmptyB1",
+	caption            = "These genes were found to be significantly differentially expressed in comparison " + comparisons["oeERvsEmptyB1"].desc + " (set 'A') but not in comparison " + comparisons["oeRHDvsEmptyB1"].desc + " (set 'B'). " +
+	                     "These genes are putative direct targets of ETV6/RUNX1. Genes sorted by column 'fc(A)'."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB1_AND_NOT_oeRHDvsEmptyB1"] = vennSetTableReport_oeERvsEmptyB1_AND_NOT_oeRHDvsEmptyB1.report
+
+// --- intersection oeERvsEmptyB1 and oeRHDvsEmptyB1
+
+vennSetTableReport_oeERvsEmptyB1_AND_oeRHDvsEmptyB1 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1", "oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_NOT_oeERvsRHDB1"},
+	outputComparisons  = {"oeERvsEmptyB1", "oeRHDvsEmptyB1"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsEmptyB1 and oeRHDvsEmptyB1",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsEmptyB1"].desc + " (set 'A') and " + comparisons["oeRHDvsEmptyB1"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB1_AND_oeRHDvsEmptyB1"] = vennSetTableReport_oeERvsEmptyB1_AND_oeRHDvsEmptyB1.report
+
+// --- intersection oeERvsEmptyB1 and oeERvsRHDB1
+
+vennSetTableReport_oeERvsEmptyB1_AND_oeERvsRHDB1 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1", "oeERvsEmptyB1_AND_NOT_oeRHDvsEmptyB1_AND_oeERvsRHDB1"},
+	outputComparisons  = {"oeERvsEmptyB1", "oeERvsRHDB1"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsEmptyB1 and oeERvsRHDB1",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsEmptyB1"].desc + " (set 'A') and " + comparisons["oeERvsRHDB1"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB1_AND_oeERvsRHDB1"] = vennSetTableReport_oeERvsEmptyB1_AND_oeERvsRHDB1.report
+
+// --- intersection oeRHDvsEmptyB1 and oeERvsRHDB1
+
+vennSetTableReport_oeRHDvsEmptyB1_AND_oeERvsRHDB1 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1", "NOT_oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1"},
+	outputComparisons  = {"oeRHDvsEmptyB1", "oeERvsRHDB1"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeRHDvsEmptyB1 and oeERvsRHDB1",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeRHDvsEmptyB1"].desc + " (set 'A') and " + comparisons["oeERvsRHDB1"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeRHDvsEmptyB1_AND_oeERvsRHDB1"] = vennSetTableReport_oeRHDvsEmptyB1_AND_oeERvsRHDB1.report
+
+// --- intersection oeERvsEmptyB1, oeRHDvsEmptyB1, and oeERvsRHDB1
+
+vennSetTableReport_oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1"},
+	outputComparisons  = {"oeERvsEmptyB1", "oeRHDvsEmptyB1", "oeERvsRHDB1"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsEmptyB1, oeRHDvsEmptyB1, oeERvsRHDB1",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in all three comparisons, including " + comparisons["oeERvsEmptyB1"].desc + " (set 'A'), " + 
+	                     comparisons["oeRHDvsEmptyB1"].desc + " (set 'B'), and " + comparisons["oeERvsRHDB1"].desc + " (set 'C'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1"] = vennSetTableReport_oeERvsEmptyB1_AND_oeRHDvsEmptyB1_AND_oeERvsRHDB1.report
+
+// === batch 2 ===
+
+// --- oeERvsEmptyB2 and NOT oeRHDvsEmptyB2
+
+vennSetTableReport_oeERvsEmptyB2_AND_NOT_oeRHDvsEmptyB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB2_AND_NOT_oeRHDvsEmptyB2_AND_oeERvsRHDB2", "oeERvsEmptyB2_AND_NOT_oeRHDvsEmptyB2_AND_NOT_oeERvsRHDB2"},
+	outputComparisons  = {"oeERvsEmptyB2", "oeRHDvsEmptyB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "oeERvsEmptyB2 but not oeRHDvsEmptyB2",
+	sectionType        = "subsubsection",
+	orderBy            = "oeERvsEmptyB2",
+	caption            = "These genes were found to be significantly differentially expressed in comparison " + comparisons["oeERvsEmptyB2"].desc + " (set 'A') but not in comparison " + comparisons["oeRHDvsEmptyB2"].desc + " (set 'B'). " +
+	                     "These genes are putative direct targets of ETV6/RUNX1. Genes sorted by column 'fc(A)'."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB2_AND_NOT_oeRHDvsEmptyB2"] = vennSetTableReport_oeERvsEmptyB2_AND_NOT_oeRHDvsEmptyB2.report
+
+// --- intersection oeERvsEmptyB2 and oeRHDvsEmptyB2
+
+vennSetTableReport_oeERvsEmptyB2_AND_oeRHDvsEmptyB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2", "oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_NOT_oeERvsRHDB2"},
+	outputComparisons  = {"oeERvsEmptyB2", "oeRHDvsEmptyB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsEmptyB2 and oeRHDvsEmptyB2",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsEmptyB2"].desc + " (set 'A') and " + comparisons["oeRHDvsEmptyB2"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB2_AND_oeRHDvsEmptyB2"] = vennSetTableReport_oeERvsEmptyB2_AND_oeRHDvsEmptyB2.report
+
+// --- intersection oeERvsEmptyB2 and oeERvsRHDB2
+
+vennSetTableReport_oeERvsEmptyB2_AND_oeERvsRHDB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2", "oeERvsEmptyB2_AND_NOT_oeRHDvsEmptyB2_AND_oeERvsRHDB2"},
+	outputComparisons  = {"oeERvsEmptyB2", "oeERvsRHDB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsEmptyB2 and oeERvsRHDB2",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsEmptyB2"].desc + " (set 'A') and " + comparisons["oeERvsRHDB2"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB2_AND_oeERvsRHDB2"] = vennSetTableReport_oeERvsEmptyB2_AND_oeERvsRHDB2.report
+
+// --- intersection oeRHDvsEmptyB2 and oeERvsRHDB2
+
+vennSetTableReport_oeRHDvsEmptyB2_AND_oeERvsRHDB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2", "NOT_oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2"},
+	outputComparisons  = {"oeRHDvsEmptyB2", "oeERvsRHDB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeRHDvsEmptyB2 and oeERvsRHDB2",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeRHDvsEmptyB2"].desc + " (set 'A') and " + comparisons["oeERvsRHDB2"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeRHDvsEmptyB2_AND_oeERvsRHDB2"] = vennSetTableReport_oeRHDvsEmptyB2_AND_oeERvsRHDB2.report
+
+// --- intersection oeERvsEmptyB2, oeRHDvsEmptyB2, and oeERvsRHDB2
+
+vennSetTableReport_oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpanded,
+	vennSetNames       = {"oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2"},
+	outputComparisons  = {"oeERvsEmptyB2", "oeRHDvsEmptyB2", "oeERvsRHDB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsEmptyB2, oeRHDvsEmptyB2, oeERvsRHDB2",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in all three comparisons, including " + comparisons["oeERvsEmptyB2"].desc + " (set 'A'), " + 
+	                     comparisons["oeRHDvsEmptyB2"].desc + " (set 'B'), and " + comparisons["oeERvsRHDB2"].desc + " (set 'C'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2"] = vennSetTableReport_oeERvsEmptyB2_AND_oeRHDvsEmptyB2_AND_oeERvsRHDB2.report
+
+// === batch 1 + 2 combined ===
 
 // --- oeERvsEmpty and NOT oeRHDvsEmpty
 
@@ -775,14 +954,85 @@ vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD = VennSetTableRepo
 degReportLst["vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD"] = vennSetTableReport_oeERvsEmpty_AND_oeRHDvsEmpty_AND_oeERvsRHD.report
 
 //------------------------------------------------------------------------------------------------
+//--- VENN DIAGRAMS COMPARING BATCHES
+//------------------------------------------------------------------------------------------------
+
+vennBatches = VennDiagram
+(
+	sets         = degSets,
+	cexSetName   = 0.3,
+	cexSetSize   = 0.3,
+	doWeights    = true,
+	sets1        = "oeERvsEmptyB1,oeERvsEmptyB2",
+	sets2        = "oeRHDvsEmptyB1,oeRHDvsEmptyB2",
+	sets3        = "oeERvsRHDB1,oeERvsRHDB2",
+	sectionTitle = "Gene set comparisons between batches",
+	sectionType  = "subsection",
+	types        = "circles"
+)
+
+degReportLst["vennBatches"] = vennBatches.report
+
+vennSetsExpandedBatches = ExpandCollapse(relation=vennBatches.sets)
+
+// --- intersection oeERvsEmptyB1 and oeERvsEmptyB2
+
+vennSetTableReport_oeERvsEmptyB1_AND_oeERvsEmptyB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpandedBatches,
+	vennSetNames       = {"oeERvsEmptyB1_AND_oeERvsEmptyB2"},
+	outputComparisons  = {"oeERvsEmptyB1", "oeERvsEmptyB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsEmptyB1 and oeERvsEmptyB2",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsEmptyB1"].desc + " (set 'A') and " + comparisons["oeERvsEmptyB2"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsEmptyB1_AND_oeERvsEmptyB2"] = vennSetTableReport_oeERvsEmptyB1_AND_oeERvsEmptyB2.report
+
+// --- intersection oeRHDvsEmptyB1 and oeRHDvsEmptyB2
+
+vennSetTableReport_oeRHDvsEmptyB1_AND_oeRHDvsEmptyB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpandedBatches,
+	vennSetNames       = {"oeRHDvsEmptyB1_AND_oeRHDvsEmptyB2"},
+	outputComparisons  = {"oeRHDvsEmptyB1", "oeRHDvsEmptyB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeRHDvsEmptyB1 and oeRHDvsEmptyB2",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeRHDvsEmptyB1"].desc + " (set 'A') and " + comparisons["oeRHDvsEmptyB2"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeRHDvsEmptyB1_AND_oeRHDvsEmptyB2"] = vennSetTableReport_oeRHDvsEmptyB1_AND_oeRHDvsEmptyB2.report
+
+// --- intersection oeERvsRHDB1 and oeERvsRHDB2
+
+vennSetTableReport_oeERvsRHDB1_AND_oeERvsRHDB2 = VennSetTableReport
+(
+	vennSetData        = vennSetsExpandedBatches,
+	vennSetNames       = {"oeERvsRHDB1_AND_oeERvsRHDB2"},
+	outputComparisons  = {"oeERvsRHDB1", "oeERvsRHDB2"},
+	degs               = degAllLst,
+	geneAnnot          = geneAnnot,
+	section            = "Intersection oeERvsRHDB1 and oeERvsRHDB2",
+	sectionType        = "subsubsection",
+	caption            = "These genes were found to be significantly differentially expressed in both " + comparisons["oeERvsRHDB1"].desc + " (set 'A') and " + comparisons["oeERvsRHDB2"].desc + " (set 'B'). " +
+	                     "Genes sorted by average FC from largest to smallest."
+)
+degReportLst["vennSetTableReport_oeERvsRHDB1_AND_oeERvsRHDB2"] = vennSetTableReport_oeERvsRHDB1_AND_oeERvsRHDB2.report
+
+
+//------------------------------------------------------------------------------------------------
 //--- EXPRESSION BOX PLOTS OF SELECTED GENES
 //------------------------------------------------------------------------------------------------
 
 boxplotER = ExpressionBoxPlot
 (
-	expr   = deseqExprMatrix.expr,
+	expr   = deseqExprMatrix.log2,
 	force sampleGroups = sampleGroups,
-	includeGroups="oe-ER-72h,oe-RHD-72h,oe-empty-72h",
+	includeGroups="oe-ER-72h-b1,oe-ER-72h-b2,oe-RHD-72h-b1,oe-RHD-72h-b2,oe-empty-72h-b1,oe-empty-72h-b2",
 	annotation = geneAnnot,
 	hgnc = "ETV6,RUNX1,ETV6-RUNX1,ETV6-RUNX1-RHD,ETV6ex6to8,RUNX1ex1",
 	nRow = 1,

@@ -6,6 +6,14 @@ fuka.d20plus <- read.delim("/mnt/projects/chrisi/results/fuka/matAnn.telamlKD.RE
 fuka.d20plus <- fuka.d20plus[,c("syms", "Padj", "logFC")]
 names(fuka.d20plus) <- c("Gene", "fuka.kdER.d20plus.padj", "fuka.kdER.d20plus.logfc")
 
+fuka.d20plus.REH <- read.delim("/mnt/projects/chrisi/results/fuka/telamlKD.REHandAT2.esetnsF.onlyG_late_REH.annot.tsv")
+fuka.d20plus.REH <- fuka.d20plus.REH[,c("syms", "Padj.onlyG_late_REH", "logFC.onlyG_late_REH")]
+names(fuka.d20plus.REH) <- c("Gene", "fuka.kdER.d20plus.REH.padj", "fuka.kdER.d20plus.REH.logfc")
+
+fuka.d20plus.AT2 <- read.delim("/mnt/projects/chrisi/results/fuka/telamlKD.REHandAT2.esetnsF.onlyG_late_AT2.annot.tsv")
+fuka.d20plus.AT2 <- fuka.d20plus.AT2[,c("syms", "Padj.onlyG_late_AT2", "logFC.onlyG_late_AT2")]
+names(fuka.d20plus.AT2) <- c("Gene", "fuka.kdER.d20plus.AT2.padj", "fuka.kdER.d20plus.AT2.logfc")
+
 fuka.d13 <- read.delim("/mnt/projects/veronika/data/fuka/telamlKD.esetnsF.onlyG_13.annot.xls")
 fuka.d13 <- fuka.d13[,c("syms", "Padj", "logFC")]
 names(fuka.d13) <- c("Gene", "fuka.kdER.d13.padj", "fuka.kdER.d13.logfc")
@@ -31,33 +39,33 @@ chrisi <- chrisi[,c("hgnc_symbol", "padj", "log2FoldChange")]
 names(chrisi) <- c("Gene", "chrisi.oeER.padj", "chrisi.oeER.logfc")
 
 veronika.E1 <- read.delim("/mnt/projects/helena_veronika/results/anduril/execute/deseqAnnotated_shG1vsNT/table.csv")
-veronika.E1 <- veronika.E1[order(veronika.E1$qValue),]
+veronika.E1 <- veronika.E1[order(veronika.E1$q),]
 veronika.E1 <- veronika.E1[!duplicated(veronika.E1$Gene),]
-veronika.E1 <- veronika.E1[,c("Gene", "qValue", "fc")]
+veronika.E1 <- veronika.E1[,c("Gene", "q", "fc")]
 names(veronika.E1) <- c("Gene", "veronika.E1.kdER.vs.empty.padj", "veronika.E1.kdER.vs.empty.logfc")
 
 veronika.E2.d3 <- read.delim("/mnt/projects/veronika/results/anduril/execute/deseqAnnotated_ERvsNTd3/table.csv")
-veronika.E2.d3 <- veronika.E2.d3[order(veronika.E2.d3$qValue),]
+veronika.E2.d3 <- veronika.E2.d3[order(veronika.E2.d3$q),]
 veronika.E2.d3 <- veronika.E2.d3[!duplicated(veronika.E2.d3$Gene),]
-veronika.E2.d3 <- veronika.E2.d3[,c("Gene", "qValue", "fc")]
+veronika.E2.d3 <- veronika.E2.d3[,c("Gene", "q", "fc")]
 names(veronika.E2.d3) <- c("Gene", "veronika.E2.kdER.vs.empty.D3.padj", "veronika.E2.kdER.vs.empty.D3.logfc")
 
 veronika.E2.d8 <- read.delim("/mnt/projects/veronika/results/anduril/execute/deseqAnnotated_ERvsNTd8/table.csv")
-veronika.E2.d8 <- veronika.E2.d8[order(veronika.E2.d8$qValue),]
+veronika.E2.d8 <- veronika.E2.d8[order(veronika.E2.d8$q),]
 veronika.E2.d8 <- veronika.E2.d8[!duplicated(veronika.E2.d8$Gene),]
-veronika.E2.d8 <- veronika.E2.d8[,c("Gene", "qValue", "fc")]
+veronika.E2.d8 <- veronika.E2.d8[,c("Gene", "q", "fc")]
 names(veronika.E2.d8) <- c("Gene", "veronika.E2.kdER.vs.empty.D8.padj", "veronika.E2.kdER.vs.empty.D8.logfc")
 
 veronika.E2.d15 <- read.delim("/mnt/projects/veronika/results/anduril/execute/deseqAnnotated_ERvsNTd15/table.csv")
-veronika.E2.d15 <- veronika.E2.d15[order(veronika.E2.d15$qValue),]
+veronika.E2.d15 <- veronika.E2.d15[order(veronika.E2.d15$q),]
 veronika.E2.d15 <- veronika.E2.d15[!duplicated(veronika.E2.d15$Gene),]
-veronika.E2.d15 <- veronika.E2.d15[,c("Gene", "qValue", "fc")]
+veronika.E2.d15 <- veronika.E2.d15[,c("Gene", "q", "fc")]
 names(veronika.E2.d15) <- c("Gene", "veronika.E2.kdER.vs.empty.D15.padj", "veronika.E2.kdER.vs.empty.D15.logfc")
 
 helena <- read.delim("/mnt/projects/helena_veronika/results/anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv")
-helena <- helena[order(helena$qValue),]
+helena <- helena[order(helena$q),]
 helena <- helena[!duplicated(helena$Gene),]
-helena <- helena[,c("Gene", "qValue", "fc")]
+helena <- helena[,c("Gene", "q", "fc")]
 names(helena) <- c("Gene", "helena.oeER.vs.empty.padj", "helena.oeER.vs.empty.logfc")
 
 fiona.chipseq.runx1 <- read.delim("/mnt/projects/fiona/results/homer/runx1_peaks.annotated.with-expr.tsv", check.names = F, stringsAsFactors = F)
@@ -96,10 +104,12 @@ niebuhr <- aggregate(niebuhr2013.chipseq.runx1.mouse~Gene, paste, collapse="|", 
 fiona.oeERvsEmpty <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv", check.names = F, stringsAsFactors = F)
 
 fiona.oeERvsEmpty <- fiona.oeERvsEmpty[!is.na(fiona.oeERvsEmpty$Gene),]
-fiona.oeERvsEmpty <- fiona.oeERvsEmpty[order(fiona.oeERvsEmpty$qValue),]
+fiona.oeERvsEmpty <- fiona.oeERvsEmpty[order(fiona.oeERvsEmpty$q),]
 fiona.oeERvsEmpty <- fiona.oeERvsEmpty[!duplicated(fiona.oeERvsEmpty$Gene),]
 fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d13, all.x=T)
 fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d20plus, all.x=T)
+fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d20plus.REH, all.x=T)
+fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d20plus.AT2, all.x=T)
 fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, boer.TA.vs.noTall, all.x=T)
 fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, boer.TA.vs.rest, all.x=T)
 fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, ross, all.x=T)

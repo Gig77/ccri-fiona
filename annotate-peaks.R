@@ -49,27 +49,13 @@ peaks <- convertMotifDist('GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distan
 peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer No. motifs' <- ifelse(is.na(peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)'), NA, sapply(strsplit(peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)', ","), length))
 
 names(peaks) <- gsub("Distance From Peak(sequence,strand,conservation)", "Distance From Summit", names(peaks), fixed=T)
-  
 
+peaks.ann <- peaks
 
-# ER vs. empty
-
-ERvsEmpty <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv")
-ERvsEmpty <- ERvsEmpty[!is.na(ERvsEmpty$Gene),c("Gene", "fc", "q")]
-ERvsEmpty <- ERvsEmpty[order(ERvsEmpty$q),]
-ERvsEmpty <- ERvsEmpty[!duplicated(ERvsEmpty$Gene),]
-names(ERvsEmpty) <- c("Gene", "fcERvsEmpty", "qERvsEmpty")
-peaks.ann <- merge(peaks, ERvsEmpty, by.x = "Gene Name", by.y = "Gene", all.x = T)
-
-# RHD vs. empty
-RHDvsEmpty <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeRHDvsEmpty/table.csv")
-RHDvsEmpty <- RHDvsEmpty[!is.na(RHDvsEmpty$Gene),c("Gene", "fc", "q")]
-RHDvsEmpty <- RHDvsEmpty[order(RHDvsEmpty$q),]
-RHDvsEmpty <- RHDvsEmpty[!duplicated(RHDvsEmpty$Gene),]
-names(RHDvsEmpty) <- c("Gene", "fcRHDvsEmpty", "qRHDvsEmpty")
-peaks.ann <- merge(peaks.ann, RHDvsEmpty, by.x = "Gene Name", by.y = "Gene", all.x = T)
-
+#-----------------------------------------------------------------
 # annotate enhancers
+#-----------------------------------------------------------------
+
 library(GenomicRanges)
 peaks.gr <- GRanges(seqnames=peaks.ann$Chr, ranges=IRanges(start=peaks.ann$summit_pos, end=peaks.ann$summit_pos), peak=peaks.ann[,2])
 
@@ -82,6 +68,166 @@ for (cl in celllines) {
   o <- findOverlaps(peaks.gr, segmentation.gr)
   peaks.ann$overlaps_enhancer_in_celllines[o@queryHits] <- ifelse(is.na(peaks.ann$overlaps_enhancer_in_celllines[o@queryHits]), cl, paste(peaks.ann$overlaps_enhancer_in_celllines[o@queryHits], cl, sep=","))
 }
+
+#-----------------------------------------------------------------
+# annotate expression datasets
+#-----------------------------------------------------------------
+
+# ER vs. empty (experiment 1)
+
+ERvsEmptyB1 <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv")
+ERvsEmptyB1 <- ERvsEmptyB1[!is.na(ERvsEmptyB1$Gene),c("Gene", "fc", "q")]
+ERvsEmptyB1 <- ERvsEmptyB1[order(ERvsEmptyB1$q),]
+ERvsEmptyB1 <- ERvsEmptyB1[!duplicated(ERvsEmptyB1$Gene),]
+names(ERvsEmptyB1) <- c("Gene", "fcERvsEmptyB1", "qERvsEmptyB1")
+peaks.ann <- merge(peaks.ann, ERvsEmptyB1, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+# RHD vs. empty (experiment 1)
+RHDvsEmptyB1 <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv")
+RHDvsEmptyB1 <- RHDvsEmptyB1[!is.na(RHDvsEmptyB1$Gene),c("Gene", "fc", "q")]
+RHDvsEmptyB1 <- RHDvsEmptyB1[order(RHDvsEmptyB1$q),]
+RHDvsEmptyB1 <- RHDvsEmptyB1[!duplicated(RHDvsEmptyB1$Gene),]
+names(RHDvsEmptyB1) <- c("Gene", "fcRHDvsEmptyB1", "qRHDvsEmptyB1")
+peaks.ann <- merge(peaks.ann, RHDvsEmptyB1, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+# ER vs. empty (experiment 2)
+
+ERvsEmptyB2 <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv")
+ERvsEmptyB2 <- ERvsEmptyB2[!is.na(ERvsEmptyB2$Gene),c("Gene", "fc", "q")]
+ERvsEmptyB2 <- ERvsEmptyB2[order(ERvsEmptyB2$q),]
+ERvsEmptyB2 <- ERvsEmptyB2[!duplicated(ERvsEmptyB2$Gene),]
+names(ERvsEmptyB2) <- c("Gene", "fcERvsEmptyB2", "qERvsEmptyB2")
+peaks.ann <- merge(peaks.ann, ERvsEmptyB2, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+# RHD vs. empty (experiment 2)
+RHDvsEmptyB2 <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv")
+RHDvsEmptyB2 <- RHDvsEmptyB2[!is.na(RHDvsEmptyB2$Gene),c("Gene", "fc", "q")]
+RHDvsEmptyB2 <- RHDvsEmptyB2[order(RHDvsEmptyB2$q),]
+RHDvsEmptyB2 <- RHDvsEmptyB2[!duplicated(RHDvsEmptyB2$Gene),]
+names(RHDvsEmptyB2) <- c("Gene", "fcRHDvsEmptyB2", "qRHDvsEmptyB2")
+peaks.ann <- merge(peaks.ann, RHDvsEmptyB2, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+fuka.d20plus <- read.delim("/mnt/projects/chrisi/results/fuka/matAnn.telamlKD.REHandAT2.esetnsF.REH.AT2.balanced.annot.tsv")
+fuka.d20plus <- fuka.d20plus[,c("syms", "Padj", "logFC")]
+fuka.d20plus <- fuka.d20plus[order(fuka.d20plus$Padj),]
+fuka.d20plus <- fuka.d20plus[!duplicated(fuka.d20plus$syms),]
+names(fuka.d20plus) <- c("Gene", "fuka.kdER.REHandAT2.d20plus.padj", "fuka.kdER.REHandAT2.d20plus.logfc")
+peaks.ann <- merge(peaks.ann, fuka.d20plus, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+fuka.d20plus.REH <- read.delim("/mnt/projects/chrisi/results/fuka/telamlKD.REHandAT2.esetnsF.onlyG_late_REH.annot.tsv")
+fuka.d20plus.REH <- fuka.d20plus.REH[,c("syms", "Padj.onlyG_late_REH", "logFC.onlyG_late_REH")]
+fuka.d20plus.REH <- fuka.d20plus.REH[order(fuka.d20plus.REH$Padj.onlyG_late_REH),]
+fuka.d20plus.REH <- fuka.d20plus.REH[!duplicated(fuka.d20plus.REH$syms),]
+names(fuka.d20plus.REH) <- c("Gene", "fuka.kdER.REH.d20plus.padj", "fuka.kdER.REH.d20plus.logfc")
+peaks.ann <- merge(peaks.ann, fuka.d20plus.REH, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+fuka.d20plus.AT2 <- read.delim("/mnt/projects/chrisi/results/fuka/telamlKD.REHandAT2.esetnsF.onlyG_late_AT2.annot.tsv")
+fuka.d20plus.AT2 <- fuka.d20plus.AT2[,c("syms", "Padj.onlyG_late_AT2", "logFC.onlyG_late_AT2")]
+fuka.d20plus.AT2 <- fuka.d20plus.AT2[order(fuka.d20plus.AT2$Padj.onlyG_late_AT2),]
+fuka.d20plus.AT2 <- fuka.d20plus.AT2[!duplicated(fuka.d20plus.AT2$syms),]
+names(fuka.d20plus.AT2) <- c("Gene", "fuka.kdER.AT2.d20plus.padj", "fuka.kdER.AT2.d20plus.logfc")
+peaks.ann <- merge(peaks.ann, fuka.d20plus.AT2, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+boer.TA.vs.noTall <- read.delim("/mnt/projects/chrisi/data/RossBoer/NordischALL.esetnsF.annot.txt", check.names=F)
+boer.TA.vs.noTall <- boer.TA.vs.noTall[,c("syms", "adjPval.TAvs.mean.noTall", "TAvs.mean.noTall")]
+boer.TA.vs.noTall <- boer.TA.vs.noTall[order(boer.TA.vs.noTall$adjPval.TAvs.mean.noTall),]
+boer.TA.vs.noTall <- boer.TA.vs.noTall[!duplicated(boer.TA.vs.noTall$syms),]
+names(boer.TA.vs.noTall) <- c("Gene", "boer.TA.vs.noTall.padj", "boer.TA.vs.noTall.logfc")
+peaks.ann <- merge(peaks.ann, boer.TA.vs.noTall, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+boer.TA.vs.rest <- read.delim("/mnt/projects/chrisi/data/RossBoer/matAnn.GSE13351_BOER.eset_zfilt_th3_nsF.tsv", check.names=F)
+boer.TA.vs.rest <- boer.TA.vs.rest[,c("syms", "adjP.TA_vs_rest", "TA_vs_rest")]
+boer.TA.vs.rest <- boer.TA.vs.rest[order(boer.TA.vs.rest$adjP.TA_vs_rest),]
+boer.TA.vs.rest <- boer.TA.vs.rest[!duplicated(boer.TA.vs.rest$syms),]
+names(boer.TA.vs.rest) <- c("Gene", "boer.TA.vs.rest.padj", "boer.TA.vs.rest.logfc")
+peaks.ann <- merge(peaks.ann, boer.TA.vs.rest, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+ross <- read.delim("/mnt/projects/chrisi/data/RossBoer/ROSS2.2003.esetnsF.annot.txt", check.names=F)
+ross <- ross[,c("syms", "adjPval.TAvs.mean_noTALL", "TAvs.mean_noTALL")]
+ross <- ross[order(ross$adjPval.TAvs.mean_noTALL),]
+ross <- ross[!duplicated(ross$syms),]
+names(ross) <- c("Gene", "ross.TA.vs.noTall.padj", "ross.TA.vs.noTall.logfc")
+peaks.ann <- merge(peaks.ann, ross, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+chrisi <- read.delim("/mnt/projects/chrisi/results/deseq/zuber+strobl-expressed-vs-notexpressed.deseq2.chipseq-annotated.tsv", check.names=F)
+chrisi <- chrisi[,c("hgnc_symbol", "padj", "log2FoldChange")]
+chrisi <- chrisi[order(chrisi$padj),]
+chrisi <- chrisi[!duplicated(chrisi$hgnc_symbol),]
+names(chrisi) <- c("Gene", "chrisi.oeER.padj", "chrisi.oeER.logfc")
+peaks.ann <- merge(peaks.ann, chrisi, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+veronika.E1 <- read.delim("/mnt/projects/helena_veronika/results/anduril/execute/deseqAnnotated_shG1vsNT/table.csv")
+veronika.E1 <- veronika.E1[,c("Gene", "q", "fc")]
+veronika.E1 <- veronika.E1[order(veronika.E1$q),]
+veronika.E1 <- veronika.E1[!duplicated(veronika.E1$Gene),]
+names(veronika.E1) <- c("Gene", "veronika.E1.kdER.vs.empty.padj", "veronika.E1.kdER.vs.empty.logfc")
+peaks.ann <- merge(peaks.ann, veronika.E1, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+veronika.E2.d3 <- read.delim("/mnt/projects/veronika/results/anduril/execute/deseqAnnotated_ERvsNTd3/table.csv")
+veronika.E2.d3 <- veronika.E2.d3[,c("Gene", "q", "fc")]
+veronika.E2.d3 <- veronika.E2.d3[order(veronika.E2.d3$q),]
+veronika.E2.d3 <- veronika.E2.d3[!duplicated(veronika.E2.d3$Gene),]
+names(veronika.E2.d3) <- c("Gene", "veronika.E2.kdER.vs.empty.D3.padj", "veronika.E2.kdER.vs.empty.D3.logfc")
+peaks.ann <- merge(peaks.ann, veronika.E2.d3, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+veronika.E2.d8 <- read.delim("/mnt/projects/veronika/results/anduril/execute/deseqAnnotated_ERvsNTd8/table.csv")
+veronika.E2.d8 <- veronika.E2.d8[,c("Gene", "q", "fc")]
+veronika.E2.d8 <- veronika.E2.d8[order(veronika.E2.d8$q),]
+veronika.E2.d8 <- veronika.E2.d8[!duplicated(veronika.E2.d8$Gene),]
+names(veronika.E2.d8) <- c("Gene", "veronika.E2.kdER.vs.empty.D8.padj", "veronika.E2.kdER.vs.empty.D8.logfc")
+peaks.ann <- merge(peaks.ann, veronika.E2.d8, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+veronika.E2.d15 <- read.delim("/mnt/projects/veronika/results/anduril/execute/deseqAnnotated_ERvsNTd15/table.csv")
+veronika.E2.d15 <- veronika.E2.d15[,c("Gene", "q", "fc")]
+veronika.E2.d15 <- veronika.E2.d15[order(veronika.E2.d15$q),]
+veronika.E2.d15 <- veronika.E2.d15[!duplicated(veronika.E2.d15$Gene),]
+names(veronika.E2.d15) <- c("Gene", "veronika.E2.kdER.vs.empty.D15.padj", "veronika.E2.kdER.vs.empty.D15.logfc")
+peaks.ann <- merge(peaks.ann, veronika.E2.d15, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+helena <- read.delim("/mnt/projects/helena_veronika/results/anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv")
+helena <- helena[,c("Gene", "q", "fc")]
+helena <- helena[order(helena$q),]
+helena <- helena[!duplicated(helena$Gene),]
+names(helena) <- c("Gene", "helena.oeER.vs.empty.padj", "helena.oeER.vs.empty.logfc")
+peaks.ann <- merge(peaks.ann, helena, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+#-----------------------------------------------------------------
+# annotate other ChIP-seq datasets
+#-----------------------------------------------------------------
+
+# ChIP-seq Tijssen et al. 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21571218)
+tijssen <- read.csv("/mnt/projects/chrisi/results/chipseq/Tijssen_all.genes.txt",  stringsAsFactors=F, sep="\t", header=T, fill=T)
+tijssen <- data.frame(Gene=tijssen$Runx1_alone, tijssen2011.chipseq.runx1=tijssen$Runx1_alone)
+tijssen <- tijssen[!duplicated(tijssen$Gene),]
+peaks.ann <- merge(peaks.ann, tijssen, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+# ChIP-seq Wilson et al. 2010 (http://www.ncbi.nlm.nih.gov/pubmed/20887958)
+wilson <- read.csv("/mnt/projects/chrisi/results/chipseq/Wilson_Gottgens_ChIPseq.txt",  stringsAsFactors=F, sep="\t", header=T, fill=T)
+wilson <- wilson[!is.na(wilson$Runx1) & wilson$Runx1 != "",]
+library(biomaRt)
+human = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice" ,dataset="hsapiens_gene_ensembl") # GRCh37, v75
+mouse = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="feb2014.archive.ensembl.org", dataset="mmusculus_gene_ensembl") # GRCm38, v75
+humOrt <- getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values=wilson$Runx1, mart = mouse, attributesL = c("hgnc_symbol", "entrezgene"), martL = human)
+wilson <- humOrt[!is.na(humOrt$EntrezGene.ID), c("HGNC.symbol", "MGI.symbol")]
+wilson <- wilson[!duplicated(wilson),]
+colnames(wilson) <- c("Gene", "wilson2010.chipseq.runx1.mouse")
+wilson <- aggregate(wilson2010.chipseq.runx1.mouse~Gene, paste, collapse="|", data=wilson)
+wilson <- wilson[wilson$Gene != "",]
+peaks.ann <- merge(peaks.ann, wilson, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+# ChIP-seq Niebuhr et. al 2013 (http://www.ncbi.nlm.nih.gov/pubmed/23704093)
+niebuhr <-  read.csv("/mnt/projects/chrisi/results/chipseq/Niebuhr_TableS3_Runx1 Peaks Called in ProB-Cells.txt", stringsAsFactors=F, sep="\t", header=T, fill=T)
+#niebuhr <- niebuhr[niebuhr$dist_tss > -5000 & niebuhr$dist_tss < 1000,]
+#niebuhr <- niebuhr[niebuhr$score >= 100,]
+humOrt <- getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values=niebuhr$nearest.gene, mart = mouse, attributesL = c("hgnc_symbol", "entrezgene"), martL = human)
+niebuhr <- humOrt[!is.na(humOrt$EntrezGene.ID), c("HGNC.symbol", "MGI.symbol")]
+niebuhr <- niebuhr[!duplicated(niebuhr),]
+colnames(niebuhr) <- c("Gene", "niebuhr2013.chipseq.runx1.mouse")
+niebuhr <- aggregate(niebuhr2013.chipseq.runx1.mouse~Gene, paste, collapse="|", data=niebuhr)
+niebuhr <- niebuhr[niebuhr$Gene != "",]
+peaks.ann <- merge(peaks.ann, niebuhr, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+
 
 # sort and write output
 peaks.ann <- peaks.ann[order(peaks.ann$'Peak Score', decreasing = T),]

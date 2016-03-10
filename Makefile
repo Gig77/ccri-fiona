@@ -24,7 +24,18 @@ SAMPLES_CHIPSEQ=32238_CGATGT_C80K5ANXX_6_20150930B_20150930 \
 				32242_CAGATC_C80K5ANXX_6_20150930B_20150930 \
 				32243_CTTGTA_C80K5ANXX_6_20150930B_20150930
 
-all: fastqc bwa homer
+SAMPLES_CHIPSEQ_2ND_BATCH=35115_ACAGTG_C81DHANXX_8_20160104B_20160104 \
+                          35116_GCCAAT_C81DHANXX_8_20160104B_20160104 \
+                          35117_CAGATC_C81DHANXX_8_20160104B_20160104 \
+                          35118_CTTGTA_C81DHANXX_8_20160104B_20160104 \
+                          35119_CGATGT_C8202ANXX_3_20160105B_20160105 \
+                          35120_TGACCA_C8202ANXX_3_20160105B_20160105 \
+                          35121_ACTTGA_C8202ANXX_3_20160105B_20160105 \
+                          35122_GATCAG_C8202ANXX_3_20160105B_20160105 \
+                          35123_TAGCTT_C8202ANXX_3_20160105B_20160105 \
+                          35124_GGCTAC_C8202ANXX_3_20160105B_20160105
+
+all: fastqc bwa flagstat homer
 
 #-----------------------------------------------------------------------------------------
 
@@ -39,19 +50,37 @@ download:
 
 	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32238_CGATGT_C80K5ANXX_6_20150930B_20150930.bam
 	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32239_TGACCA_C80K5ANXX_6_20150930B_20150930.bam
-	wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32240_ACAGTG_C80K5ANXX_6_20150930B_20150930.bam
-	wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32241_GCCAAT_C80K5ANXX_6_20150930B_20150930.bam
-	wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32242_CAGATC_C80K5ANXX_6_20150930B_20150930.bam
-	wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32243_CTTGTA_C80K5ANXX_6_20150930B_20150930.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32240_ACAGTG_C80K5ANXX_6_20150930B_20150930.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32241_GCCAAT_C80K5ANXX_6_20150930B_20150930.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32242_CAGATC_C80K5ANXX_6_20150930B_20150930.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32243_CTTGTA_C80K5ANXX_6_20150930B_20150930.bam
+	
+	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35109_CGATGT_C8918ANXX_8_20151231B_20151231.bam
+	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35110_TGACCA_C8918ANXX_8_20151231B_20151231.bam
+	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35111_ACAGTG_C8918ANXX_8_20151231B_20151231.bam
+	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35112_GCCAAT_C8918ANXX_8_20151231B_20151231.bam
+	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35113_CAGATC_C8918ANXX_8_20151231B_20151231.bam
+	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35114_CTTGTA_C8918ANXX_8_20151231B_20151231.bam
+
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35115_ACAGTG_C81DHANXX_8_20160104B_20160104.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35116_GCCAAT_C81DHANXX_8_20160104B_20160104.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35117_CAGATC_C81DHANXX_8_20160104B_20160104.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35118_CTTGTA_C81DHANXX_8_20160104B_20160104.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35119_CGATGT_C8202ANXX_3_20160105B_20160105.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35120_TGACCA_C8202ANXX_3_20160105B_20160105.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35121_ACTTGA_C8202ANXX_3_20160105B_20160105.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35122_GATCAG_C8202ANXX_3_20160105B_20160105.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35123_TAGCTT_C8202ANXX_3_20160105B_20160105.bam
+	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35124_GGCTAC_C8202ANXX_3_20160105B_20160105.bam
 
 # --------------------------------------------------------------------------------
 # FASTQC
 # --------------------------------------------------------------------------------
 
 .PHONY: fastqc
-fastqc: $(foreach S, $(SAMPLES_CHIPSEQ), fastqc/$S_fastqc.html)
+fastqc: $(foreach S, $(SAMPLES_CHIPSEQ) $(SAMPLES_CHIPSEQ_2ND_BATCH), fastqc/$S_fastqc.html)
 	
-fastqc/%_fastqc.html: $(PROJECT_HOME)/data/bam/chipseq/%.bam
+fastqc/%_fastqc.html: $(PROJECT_HOME)/data/bam/%.bam
 	mkdir -p fastqc/$*.part
 	/data_synology/software/FastQC-0.11.2/fastqc -o fastqc/$*.part -f bam $^
 	mv fastqc/$*.part/* fastqc
@@ -62,7 +91,7 @@ fastqc/%_fastqc.html: $(PROJECT_HOME)/data/bam/chipseq/%.bam
 # --------------------------------------------------------------------------------
 
 .PHONY: flagstat
-flagstat: $(foreach S, $(SAMPLES_CHIPSEQ), qc/$S.samtools.flagstat)
+flagstat: $(foreach S, $(SAMPLES_CHIPSEQ) $(SAMPLES_CHIPSEQ_2ND_BATCH), qc/$S.samtools.flagstat)
 
 qc/%.samtools.flagstat: bwa/%.bwa.sorted.bam
 	mkdir -p qc
@@ -74,9 +103,9 @@ qc/%.samtools.flagstat: bwa/%.bwa.sorted.bam
 # --------------------------------------------------------------------------------
 
 .PHONY: bwa
-bwa: $(foreach S, $(SAMPLES_CHIPSEQ), bwa/$S.bwa.sorted.bam.bai)
+bwa: $(foreach S, $(SAMPLES_CHIPSEQ) $(SAMPLES_CHIPSEQ_2ND_BATCH), bwa/$S.bwa.sorted.bam.bai)
 
-bwa/%.bwa.sorted.bam: $(PROJECT_HOME)/data/bam/chipseq/%.bam
+bwa/%.bwa.sorted.bam: $(PROJECT_HOME)/data/bam/%.bam
 	mkdir -p bwa
 	$(BWA) aln -b -t 10 /mnt/projects/generic/data/broad/human_g1k_v37.fasta $< \
 		| $(BWA) samse /mnt/projects/generic/data/broad/human_g1k_v37.fasta - $< \
@@ -101,36 +130,67 @@ bwa/%.bwa.sorted.filtered.bam: bwa/%.bwa.sorted.bam
 	 
 bwa/%.bwa.sorted.bam.bai: bwa/%.bwa.sorted.bam
 	rm -f $@
-	$(SAMTOOLS) index $^ $@.part 2>&1 | $(LOG)
+	/data_synology/software/samtools-0.1.19/samtools index $^ $@.part 2>&1 | $(LOG)
 	
 # --------------------------------------------------------------------------------
 # peak calling (MACS)
 # --------------------------------------------------------------------------------
 
 .PHONY: macs
-macs: macs/runx1_peaks.bed macs/er_peaks.bed macs/rhd_peaks.bed
+macs: macs/runx1_peaks.bed macs/er_peaks.bed macs/rhd_peaks.bed macs/ChIP24_AT2_ER_peaks.bed macs/ChIP24_REH_ER_peaks.bed macs/ChIP22_NALM6_RUNX1_peaks.bed macs/ChIP22_NALM6_ER_peaks.bed macs/ChIP22_NALM6_RHD_peaks.bed
 
 macs/runx1_peaks.bed: bwa/32243_CTTGTA_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam bwa/32242_CAGATC_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam
 	mkdir -p macs
-	#WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n runx1 -q 0.01 --broad 2>&1 | $(LOG)
 	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n runx1 -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
 
 macs/er_peaks.bed: bwa/32239_TGACCA_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam bwa/32238_CGATGT_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam
 	mkdir -p macs
-	#WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n er -q 0.01 --broad 2>&1 | $(LOG)
 	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n er -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
 
 macs/rhd_peaks.bed: bwa/32241_GCCAAT_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam bwa/32240_ACAGTG_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam
 	mkdir -p macs
-	#WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n rhd -q 0.01 --broad 2>&1 | $(LOG)
 	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n rhd -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
+
+macs/ChIP24_AT2_ER_peaks.bed: bwa/35116_GCCAAT_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam bwa/35115_ACAGTG_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
+	mkdir -p macs
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP24_AT2_ER -q 0.01 --broad 2>&1 | $(LOG)
+
+macs/ChIP24_REH_ER_peaks.bed: bwa/35118_CTTGTA_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam bwa/35117_CAGATC_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
+	mkdir -p macs
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP24_REH_ER -q 0.01 --broad 2>&1 | $(LOG)
+
+macs/ChIP22_NALM6_RUNX1_peaks.bed: bwa/35120_TGACCA_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam bwa/35119_CGATGT_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	mkdir -p macs
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP22_NALM6_RUNX1 -q 0.01 --broad 2>&1 | $(LOG)
+
+macs/ChIP23_NALM6_ER_peaks.bed: bwa/35122_GATCAG_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam bwa/35121_ACTTGA_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	mkdir -p macs
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_ER -q 0.01 --broad 2>&1 | $(LOG)
+
+macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam bwa/35123_TAGCTT_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	mkdir -p macs
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_RHD -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
 
 # --------------------------------------------------------------------------------
 # peak annotation (Homer)
 # --------------------------------------------------------------------------------
 .PHONY: homer
-homer: homer/runx1_peaks.annotated.with-expr.tsv homer/er_peaks.annotated.with-expr.tsv homer/rhd_peaks.annotated.with-expr.tsv \
-       motifs/runx1_motifs.homer motifs/er_motifs.homer motifs/rhd_motifs.homer
+homer: homer/runx1_peaks.annotated.with-expr.tsv \
+       homer/er_peaks.annotated.with-expr.tsv \
+       homer/rhd_peaks.annotated.with-expr.tsv \
+       homer/ChIP24_AT2_ER_peaks.annotated.with-expr.tsv \
+       homer/ChIP24_REH_ER_peaks.annotated.with-expr.tsv \
+       homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv \
+       homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv \
+       homer/ChIP23_NALM6_RHD_peaks.annotated.with-expr.tsv \
+       motifs/runx1_motifs.homer \
+       motifs/er_motifs.homer \
+       motifs/rhd_motifs.homer \
+       motifs/ChIP24_AT2_ER_motifs.homer \
+       motifs/ChIP24_REH_ER_motifs.homer \
+       motifs/ChIP22_NALM6_RUNX1_motifs.homer \
+       motifs/ChIP23_NALM6_ER_motifs.homer \
+       motifs/ChIP23_NALM6_RHD_motifs.homer
 	
 homer/%_peaks.ucsc.bed: macs/%_peaks.bed
 	mkdir -p homer
@@ -156,16 +216,13 @@ homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed /mnt/projects/fiona/data/run
 	mv $@.part $@
 	cat homer/$*_peaks.runx1-motif.bed | grep -v "^track" | sort -k 1,1 -k2g,2g > homer/$*-peak-motifs.sorted.bed
 	
-homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv macs/%_summits.bed anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmpty/table.csv /mnt/projects/fiona/scripts/annotate-peaks.R
-	Rscript /mnt/projects/fiona/scripts/annotate-peaks.R --peak-file $(word 1, $^) --summit-file $(word 2, $^) --out-file $@.part
-	mv $@.part $@
-	
 motifs/%_motifs.homer: homer/%_peaks.ucsc.bed
 	mkdir -p motifs/$*
 	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -size 200 -mask -p 15 -fdr 100 > $@.part
 	mv $@.part $@
 
-# --------------------------------------------------------------------------------
-# annotate peaks with expression data
-# --------------------------------------------------------------------------------
+homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv /mnt/projects/fiona/scripts/annotate-peaks.R
+	Rscript /mnt/projects/fiona/scripts/annotate-peaks.R --peak-file $(word 1, $^) --summit-file macs/$*_summits.bed --out-file $@.part
+	mv $@.part $@
+	
 	 
