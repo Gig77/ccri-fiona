@@ -68,6 +68,12 @@ helena <- helena[!duplicated(helena$Gene),]
 helena <- helena[,c("Gene", "q", "fc")]
 names(helena) <- c("Gene", "helena.oeER.vs.empty.padj", "helena.oeER.vs.empty.logfc")
 
+fionaB1.oeERvsEmpty <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv")
+fionaB1.oeERvsEmpty <- fionaB1.oeERvsEmpty[order(fionaB1.oeERvsEmpty$q),]
+fionaB1.oeERvsEmpty <- fionaB1.oeERvsEmpty[!duplicated(fionaB1.oeERvsEmpty$Gene),]
+fionaB1.oeERvsEmpty <- fionaB1.oeERvsEmpty[,c("Gene", "q", "fc")]
+names(fionaB1.oeERvsEmpty) <- c("Gene", "fionaB1.oeER.vs.empty.padj", "fionaB1.oeER.vs.empty.logfc")
+
 fiona.chipseq.runx1 <- read.delim("/mnt/projects/fiona/results/homer/runx1_peaks.annotated.with-expr.tsv", check.names = F, stringsAsFactors = F)
 #fiona.chipseq.runx1 <- fiona.chipseq.runx1[fiona.chipseq.runx1$`Distance to TSS` > -2000 & fiona.chipseq.runx1$`Distance to TSS` < 1000,]
 fiona.chipseq.runx1.tssdist <- aggregate(`Distance to TSS` ~ `Gene Name`, paste, collapse=",", data=fiona.chipseq.runx1)
@@ -101,45 +107,48 @@ niebuhr <- aggregate(niebuhr2013.chipseq.runx1.mouse~Gene, paste, collapse="|", 
 
 # merge
 
-fiona.oeERvsEmpty <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmpty/table.csv", check.names = F, stringsAsFactors = F)
+fiona.oeERvsEmptyB2 <- read.delim("/mnt/projects/fiona/results/anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv", check.names = F, stringsAsFactors = F)
 
-fiona.oeERvsEmpty <- fiona.oeERvsEmpty[!is.na(fiona.oeERvsEmpty$Gene),]
-fiona.oeERvsEmpty <- fiona.oeERvsEmpty[order(fiona.oeERvsEmpty$q),]
-fiona.oeERvsEmpty <- fiona.oeERvsEmpty[!duplicated(fiona.oeERvsEmpty$Gene),]
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d13, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d20plus, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d20plus.REH, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fuka.d20plus.AT2, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, boer.TA.vs.noTall, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, boer.TA.vs.rest, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, ross, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, chrisi, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, veronika.E1, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, veronika.E2.d3, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, veronika.E2.d8, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, veronika.E2.d15, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, helena, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, fiona.chipseq.runx1.tssdist, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, tijssen, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, wilson, all.x=T)
-fiona.oeERvsEmpty <- merge(fiona.oeERvsEmpty, niebuhr, all.x=T)
+fiona.oeERvsEmptyB2 <- fiona.oeERvsEmptyB2[!is.na(fiona.oeERvsEmptyB2$Gene),]
+fiona.oeERvsEmptyB2 <- fiona.oeERvsEmptyB2[order(fiona.oeERvsEmptyB2$q),]
+fiona.oeERvsEmptyB2 <- fiona.oeERvsEmptyB2[!duplicated(fiona.oeERvsEmptyB2$Gene),]
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, fuka.d13, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, fuka.d20plus, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, fuka.d20plus.REH, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, fuka.d20plus.AT2, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, boer.TA.vs.noTall, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, boer.TA.vs.rest, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, ross, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, chrisi, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, veronika.E1, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, veronika.E2.d3, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, veronika.E2.d8, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, veronika.E2.d15, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, helena, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, fionaB1.oeERvsEmpty, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, fiona.chipseq.runx1.tssdist, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, tijssen, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, wilson, all.x=T)
+fiona.oeERvsEmptyB2 <- merge(fiona.oeERvsEmptyB2, niebuhr, all.x=T)
 
 # compute logFC averages over all data sets
-fcs <- data.frame(fiona.oeERvsEmpty$fc, 
-                  -fiona.oeERvsEmpty$fuka.kdER.d13.logfc, 
-                  -fiona.oeERvsEmpty$fuka.kdER.d20plus.logfc,
-                  fiona.oeERvsEmpty$boer.TA.vs.noTall.logfc,
-                  fiona.oeERvsEmpty$boer.TA.vs.rest.logfc,
-                  fiona.oeERvsEmpty$ross.TA.vs.noTall.logfc,
-                  fiona.oeERvsEmpty$chrisi.oeER.logfc,
-                  -fiona.oeERvsEmpty$veronika.E1.kdER.vs.empty.logfc,
-                  -fiona.oeERvsEmpty$veronika.E2.kdER.vs.empty.D3.logfc,
-                  -fiona.oeERvsEmpty$veronika.E2.kdER.vs.empty.D8.logfc,
-                  -fiona.oeERvsEmpty$veronika.E2.kdER.vs.empty.D15.logfc,
-                  fiona.oeERvsEmpty$helena.oeER.vs.empty.logfc,
+fcs <- with(fiona.oeERvsEmptyB2, data.frame(
+                  fc, 
+                  -fuka.kdER.d13.logfc, 
+                  -fuka.kdER.d20plus.logfc,
+                  boer.TA.vs.noTall.logfc,
+                  boer.TA.vs.rest.logfc,
+                  ross.TA.vs.noTall.logfc,
+                  chrisi.oeER.logfc,
+                  -veronika.E1.kdER.vs.empty.logfc,
+                  -veronika.E2.kdER.vs.empty.D3.logfc,
+                  -veronika.E2.kdER.vs.empty.D8.logfc,
+                  -veronika.E2.kdER.vs.empty.D15.logfc,
+                  helena.oeER.vs.empty.logfc,
+                  fionaB1.oeER.vs.empty.logfc,
                   check.names = F, 
-                  stringsAsFactors = F)
+                  stringsAsFactors = F))
 fcs[is.na(fcs)] <- 0
-fiona.oeERvsEmpty$meanFC <- rowMeans(fcs)
+fiona.oeERvsEmptyB2$meanFC <- rowMeans(fcs)
 
-write.table(fiona.oeERvsEmpty, "/mnt/projects/fiona/results/oeERvsEmpty.combined.tsv", sep = "\t", quote = F, col.names = T, row.names = F)
+write.table(fiona.oeERvsEmptyB2, "/mnt/projects/fiona/results/oeERvsEmpty.combined.tsv", sep = "\t", quote = F, col.names = T, row.names = F, na="")

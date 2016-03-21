@@ -191,6 +191,83 @@ helena <- helena[!duplicated(helena$Gene),]
 names(helena) <- c("Gene", "helena.oeER.vs.empty.padj", "helena.oeER.vs.empty.logfc")
 peaks.ann <- merge(peaks.ann, helena, by.x = "Gene Name", by.y = "Gene", all.x = T)
 
+kasia.L24vsC24 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_L24vsC24/table.csv")
+kasia.L24vsC24 <- kasia.L24vsC24[order(kasia.L24vsC24$q),]
+kasia.L24vsC24 <- kasia.L24vsC24[!duplicated(kasia.L24vsC24$Gene),]
+kasia.L24vsC24 <- kasia.L24vsC24[,c("Gene", "q", "fc")]
+names(kasia.L24vsC24) <- c("Gene", "kasia.HDACi.L24vsC24.padj", "kasia.HDACi.L24vsC24.logfc")
+peaks.ann <- merge(peaks.ann, kasia.L24vsC24, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.H24vsC24 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_H24vsC24/table.csv")
+kasia.H24vsC24 <- kasia.H24vsC24[order(kasia.H24vsC24$q),]
+kasia.H24vsC24 <- kasia.H24vsC24[!duplicated(kasia.H24vsC24$Gene),]
+kasia.H24vsC24 <- kasia.H24vsC24[,c("Gene", "q", "fc")]
+names(kasia.H24vsC24) <- c("Gene", "kasia.HDACi.H24vsC24.padj", "kasia.HDACi.H24vsC24.logfc")
+peaks.ann <- merge(peaks.ann, kasia.H24vsC24, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.L48vsC48 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_L48vsC48/table.csv")
+kasia.L48vsC48 <- kasia.L48vsC48[order(kasia.L48vsC48$q),]
+kasia.L48vsC48 <- kasia.L48vsC48[!duplicated(kasia.L48vsC48$Gene),]
+kasia.L48vsC48 <- kasia.L48vsC48[,c("Gene", "q", "fc")]
+names(kasia.L48vsC48) <- c("Gene", "kasia.HDACi.L48vsC48.padj", "kasia.HDACi.L48vsC48.logfc")
+peaks.ann <- merge(peaks.ann, kasia.L48vsC48, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.H48vsC48 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_H48vsC48/table.csv")
+kasia.H48vsC48 <- kasia.H48vsC48[order(kasia.H48vsC48$q),]
+kasia.H48vsC48 <- kasia.H48vsC48[!duplicated(kasia.H48vsC48$Gene),]
+kasia.H48vsC48 <- kasia.H48vsC48[,c("Gene", "q", "fc")]
+names(kasia.H48vsC48) <- c("Gene", "kasia.HDACi.H48vsC48.padj", "kasia.HDACi.H48vsC48.logfc")
+peaks.ann <- merge(peaks.ann, kasia.H48vsC48, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.H24vsL24 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_H24vsL24/table.csv")
+kasia.H24vsL24 <- kasia.H24vsL24[order(kasia.H24vsL24$q),]
+kasia.H24vsL24 <- kasia.H24vsL24[!duplicated(kasia.H24vsL24$Gene),]
+kasia.H24vsL24 <- kasia.H24vsL24[,c("Gene", "q", "fc")]
+names(kasia.H24vsL24) <- c("Gene", "kasia.HDACi.H24vsL24.padj", "kasia.HDACi.H24vsL24.logfc")
+peaks.ann <- merge(peaks.ann, kasia.H24vsL24, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.H48vsL48 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_H48vsL48/table.csv")
+kasia.H48vsL48 <- kasia.H48vsL48[order(kasia.H48vsL48$q),]
+kasia.H48vsL48 <- kasia.H48vsL48[!duplicated(kasia.H48vsL48$Gene),]
+kasia.H48vsL48 <- kasia.H48vsL48[,c("Gene", "q", "fc")]
+names(kasia.H48vsL48) <- c("Gene", "kasia.HDACi.H48vsL48.padj", "kasia.HDACi.H48vsL48.logfc")
+peaks.ann <- merge(peaks.ann, kasia.H48vsL48, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.H48vsH24 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_H48vsH24/table.csv")
+kasia.H48vsH24 <- kasia.H48vsH24[order(kasia.H48vsH24$q),]
+kasia.H48vsH24 <- kasia.H48vsH24[!duplicated(kasia.H48vsH24$Gene),]
+kasia.H48vsH24 <- kasia.H48vsH24[,c("Gene", "q", "fc")]
+names(kasia.H48vsH24) <- c("Gene", "kasia.HDACi.H48vsH24.padj", "kasia.HDACi.H48vsH24.logfc")
+peaks.ann <- merge(peaks.ann, kasia.H48vsH24, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.L48vsL24 <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_L48vsL24/table.csv")
+kasia.L48vsL24 <- kasia.L48vsL24[order(kasia.L48vsL24$q),]
+kasia.L48vsL24 <- kasia.L48vsL24[!duplicated(kasia.L48vsL24$Gene),]
+kasia.L48vsL24 <- kasia.L48vsL24[,c("Gene", "q", "fc")]
+names(kasia.L48vsL24) <- c("Gene", "kasia.HDACi.L48vsL24.padj", "kasia.HDACi.L48vsL24.logfc")
+peaks.ann <- merge(peaks.ann, kasia.L48vsL24, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.LvsC <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_LvsC/table.csv")
+kasia.LvsC <- kasia.LvsC[order(kasia.LvsC$q),]
+kasia.LvsC <- kasia.LvsC[!duplicated(kasia.LvsC$Gene),]
+kasia.LvsC <- kasia.LvsC[,c("Gene", "q", "fc")]
+names(kasia.LvsC) <- c("Gene", "kasia.HDACi.LvsC.padj", "kasia.HDACi.LvsC.logfc")
+peaks.ann <- merge(peaks.ann, kasia.LvsC, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.HvsC <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_HvsC/table.csv")
+kasia.HvsC <- kasia.HvsC[order(kasia.HvsC$q),]
+kasia.HvsC <- kasia.HvsC[!duplicated(kasia.HvsC$Gene),]
+kasia.HvsC <- kasia.HvsC[,c("Gene", "q", "fc")]
+names(kasia.HvsC) <- c("Gene", "kasia.HDACi.HvsC.padj", "kasia.HDACi.HvsC.logfc")
+peaks.ann <- merge(peaks.ann, kasia.HvsC, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
+kasia.HvsL <- read.delim("/mnt/projects/kasia/results/anduril/execute/deseqAnnotated_HvsL/table.csv")
+kasia.HvsL <- kasia.HvsL[order(kasia.HvsL$q),]
+kasia.HvsL <- kasia.HvsL[!duplicated(kasia.HvsL$Gene),]
+kasia.HvsL <- kasia.HvsL[,c("Gene", "q", "fc")]
+names(kasia.HvsL) <- c("Gene", "kasia.HDACi.HvsL.padj", "kasia.HDACi.HvsL.logfc")
+peaks.ann <- merge(peaks.ann, kasia.HvsL, by.x = "Gene Name", by.y = "Gene", all.x = T)
+
 #-----------------------------------------------------------------
 # annotate other ChIP-seq datasets
 #-----------------------------------------------------------------
