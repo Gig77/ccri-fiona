@@ -137,7 +137,14 @@ bwa/%.bwa.sorted.bam.bai: bwa/%.bwa.sorted.bam
 # --------------------------------------------------------------------------------
 
 .PHONY: macs
-macs: macs/runx1_peaks.bed macs/er_peaks.bed macs/rhd_peaks.bed macs/ChIP24_AT2_ER_peaks.bed macs/ChIP24_REH_ER_peaks.bed macs/ChIP22_NALM6_RUNX1_peaks.bed macs/ChIP22_NALM6_ER_peaks.bed macs/ChIP22_NALM6_RHD_peaks.bed
+macs: macs/runx1_peaks.bed \
+	  macs/er_peaks.bed \
+	  macs/rhd_peaks.bed \
+	  macs/ChIP24_AT2_ER_peaks.bed macs/ChIP24_AT2_ER_model.pdf \
+	  macs/ChIP24_REH_ER_peaks.bed macs/ChIP24_REH_ER_model.pdf \
+	  macs/ChIP22_NALM6_RUNX1_peaks.bed macs/ChIP22_NALM6_RUNX1_model.pdf \
+	  macs/ChIP23_NALM6_ER_peaks.bed macs/ChIP23_NALM6_ER_model.pdf \
+	  macs/ChIP23_NALM6_RHD_peaks.bed
 
 macs/runx1_peaks.bed: bwa/32243_CTTGTA_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam bwa/32242_CAGATC_C80K5ANXX_6_20150930B_20150930.bwa.sorted.filtered.bam
 	mkdir -p macs
@@ -171,6 +178,9 @@ macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105
 	mkdir -p macs
 	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_RHD -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
 
+macs/%_model.pdf: macs/%_model.r
+	cd macs && Rscript ../$<
+	
 # --------------------------------------------------------------------------------
 # peak annotation (Homer)
 # --------------------------------------------------------------------------------
