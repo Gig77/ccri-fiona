@@ -180,7 +180,49 @@ macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105
 
 macs/%_model.pdf: macs/%_model.r
 	cd macs && Rscript ../$<
-	
+
+# --------------------------------------------------------------------------------
+# HOMER bedgraph files containing normalized read coverage
+# --------------------------------------------------------------------------------
+.PHONY: tags
+tags: homer-tagfiles/ChIP24_AT2_ER_input.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP24_AT2_ER_chip.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP24_REH_ER_input.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP24_REH_ER_chip.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP22_NALM6_RUNX1_input.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP22_NALM6_RUNX1_chip.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP23_NALM6_ER_input.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP23_NALM6_ER_chip.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP23_NALM6_RHD_input.ucsc.bedGraph.gz \
+	  homer-tagfiles/ChIP23_NALM6_RHD_chip.ucsc.bedGraph.gz
+
+homer-tagfiles/%.ucsc.bedGraph.gz: homer-tagfiles/%/tagInfo.txt
+	$(HOMER) makeUCSCfile homer-tagfiles/$* -norm 3e7 -o auto
+	zcat homer-tagfiles/$*/$*.ucsc.bedGraph.gz | perl -ne 's/^(\d+|MT|X|Y)/chr$$1/; print $$_;' | gzip -c > $@.part
+	rm -f $@ homer-tagfiles/$*/$*.ucsc.bedGraph.gz
+	mv $@.part $@
+
+homer-tagfiles/ChIP24_AT2_ER_input/tagInfo.txt: bwa/35115_ACAGTG_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP24_AT2_ER_chip/tagInfo.txt: bwa/35116_GCCAAT_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP24_REH_ER_input/tagInfo.txt: bwa/35117_CAGATC_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP24_REH_ER_chip/tagInfo.txt: bwa/35118_CTTGTA_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP22_NALM6_RUNX1_input/tagInfo.txt: bwa/35119_CGATGT_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP22_NALM6_RUNX1_chip/tagInfo.txt: bwa/35120_TGACCA_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP23_NALM6_ER_input/tagInfo.txt: bwa/35121_ACTTGA_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP23_NALM6_ER_chip/tagInfo.txt: bwa/35122_GATCAG_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP23_NALM6_RHD_input/tagInfo.txt: bwa/35123_TAGCTT_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+homer-tagfiles/ChIP23_NALM6_RHD_chip/tagInfo.txt: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	$(HOMER) makeTagDirectory $(dir $@) $<
+
 # --------------------------------------------------------------------------------
 # peak annotation (Homer)
 # --------------------------------------------------------------------------------
