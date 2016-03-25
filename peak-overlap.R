@@ -456,16 +456,17 @@ fuka.d20plus <- fuka.d20plus[,c("syms", "Padj", "logFC")]
 names(fuka.d20plus) <- c("Gene", "fuka.kdER.d20plus.padj", "fuka.kdER.d20plus.logfc")
 
 at2.reh.er.fuka <- at2[o.at2.reh@queryHits,]
-at2.reh.er.fuka <- at2.reh.er.fuka[order(at2.reh.er.fuka$`Peak Score`, decreasing = T),c("Gene Name", "Peak Score", "Distance to TSS")]
+at2.reh.er.fuka <- at2.reh.er.fuka[order(at2.reh.er.fuka$`Peak Score`, decreasing = T),c("Gene Name", "Peak Score", "Distance to TSS", "RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer Distance From Summit")]
 at2.reh.er.fuka <- at2.reh.er.fuka[at2.reh.er.fuka$`Distance to TSS` >= -max.dist.TSS.us & at2.reh.er.fuka$`Distance to TSS` <= max.dist.TSS.ds,]
 at2.reh.er.fuka <- at2.reh.er.fuka[!duplicated(at2.reh.er.fuka$`Gene Name`),]
 at2.reh.er.fuka <- merge(at2.reh.er.fuka, fuka.d20plus, by.x="Gene Name", by.y="Gene", all=T)
-names(at2.reh.er.fuka) <- c("Gene", "PeakScore", "DistTSS", "padj", "logfc")
+names(at2.reh.er.fuka) <- c("Gene", "PeakScore", "DistTSS", "runx1.motif.dist", "padj", "logfc")
 
 at2.reh.er.fuka$PeakScore[is.na(at2.reh.er.fuka$PeakScore)] <- 0
 at2.reh.er.fuka$padj[is.na(at2.reh.er.fuka$padj)] <- 1
 at2.reh.er.fuka$logfc[is.na(at2.reh.er.fuka$logfc)] <- 0
 at2.reh.er.fuka$DistTSS[is.na(at2.reh.er.fuka$DistTSS)] <- 0
+at2.reh.er.fuka$runx1.motif.dist[is.na(at2.reh.er.fuka$runx1.motif.dist)] <- ""
 
 # AT2+REH down-regulated
 
@@ -534,6 +535,40 @@ mosaic(t.at2.reh.upvsdn, pop=F,
        main="AT2+REH E/R ChIP vs. Fuka KD", 
        sub=sprintf("OR=%.2f p=%.2g", fisher.test(t.at2.reh.upvsdn)$estimate, fisher.test(t.at2.reh.upvsdn)$p.value))
 labeling_cells(text=t.at2.reh.upvsdn, gp_text = gpar(cex=1), rot = 0, margin = unit(0, "lines"))(t.at2.reh.upvsdn)
+
+# AT2+REH with RUNX1 motif, down-regulated
+
+t.at2.reh.wRUNX1motif.downreg <- with(at2.reh.er.fuka, as.table(matrix(c(
+  sum(PeakScore > 0 & runx1.motif.dist != "" & padj <= minPadj & logfc <= -minLogfc),
+  sum(PeakScore > 0 & runx1.motif.dist != "" & (padj > minPadj | logfc > -minLogfc)),
+  sum((PeakScore == 0 | runx1.motif.dist == "") & padj <= minPadj & logfc <= -minLogfc),
+  sum((PeakScore == 0 | runx1.motif.dist == "") & (padj > minPadj | logfc > -minLogfc))),
+  nrow = 2,
+  byrow = T,
+  dimnames = list('ChIP.ER.AT2+REH'           = c("Peak+", "Peak-"),
+                  'fuka.kdER.d20plus.AT2+REH' = c("down-reg.", "other")))))
+
+mosaic(t.at2.reh.wRUNX1motif.downreg, pop=F, 
+       main="AT2+REH E/R ChIP w/ RUNX1 motif vs. Fuka KD", 
+       sub=sprintf("OR=%.2f p=%.2g", fisher.test(t.at2.reh.wRUNX1motif.downreg)$estimate, fisher.test(t.at2.reh.wRUNX1motif.downreg)$p.value))
+labeling_cells(text=t.at2.reh.wRUNX1motif.downreg, gp_text = gpar(cex=1), rot = 0, margin = unit(0, "lines"))(t.at2.reh.wRUNX1motif.downreg)
+
+# AT2+REH with RUNX1 motif, up-regulated
+
+t.at2.reh.wRUNX1motif.upreg <- with(at2.reh.er.fuka, as.table(matrix(c(
+  sum(PeakScore > 0 & runx1.motif.dist != "" & padj <= minPadj & logfc >= minLogfc),
+  sum(PeakScore > 0 & runx1.motif.dist != "" & (padj > minPadj | logfc < minLogfc)),
+  sum((PeakScore == 0 | runx1.motif.dist == "") & padj <= minPadj & logfc >= minLogfc),
+  sum((PeakScore == 0 | runx1.motif.dist == "") & (padj > minPadj | logfc < minLogfc))),
+  nrow = 2,
+  byrow = T,
+  dimnames = list('ChIP.ER.AT2+REH'           = c("Peak+", "Peak-"),
+                  'fuka.kdER.d20plus.AT2+REH' = c("up-reg.", "other")))))
+
+mosaic(t.at2.reh.wRUNX1motif.upreg, pop=F, 
+       main="AT2+REH E/R ChIP w/ RUNX1 motif vs. Fuka KD", 
+       sub=sprintf("OR=%.2f p=%.2g", fisher.test(t.at2.reh.wRUNX1motif.upreg)$estimate, fisher.test(t.at2.reh.wRUNX1motif.upreg)$p.value))
+labeling_cells(text=t.at2.reh.wRUNX1motif.upreg, gp_text = gpar(cex=1), rot = 0, margin = unit(0, "lines"))(t.at2.reh.wRUNX1motif.upreg)
 
 #=========================
 # NALM6
@@ -643,12 +678,15 @@ t <- fisher.test(t.at2.reh.downreg) ; data.at2.reh.fuka = rbind(data.at2.reh.fuk
 #t <- fisher.test(t.at2.reh.diffreg) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("AT2+REH", "up- or down-regulated", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
 #t <- fisher.test(t.at2.reh.upvsdn) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("AT2+REH", "up- vs. down-regulated", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
 
+t <- fisher.test(t.at2.reh.wRUNX1motif.upreg) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("AT2+REH\nw/ motif", "E/R repressed", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
+t <- fisher.test(t.at2.reh.wRUNX1motif.downreg) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("AT2+REH\nw/ motif", "E/R activated", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
+
 t <- fisher.test(t.nalm6.upreg) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("NALM-6", "E/R activated", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
 t <- fisher.test(t.nalm6.downreg) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("NALM-6", "E/R repressed", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
 #t <- fisher.test(t.nalm6.diffreg) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("NALM-6", "up- or down-regulated", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
 #t <- fisher.test(t.nalm6.upvsdn) ; data.at2.reh.fuka = rbind(data.at2.reh.fuka, setNames(data.frame("NALM-6", "up- vs. down-regulated", t$estimate, t$conf.int[1], t$conf.int[2], t$p.value, stringsAsFactors = F), names(data.at2.reh.fuka)))
 
-data.at2.reh.fuka$CL <- factor(data.at2.reh.fuka$CL, levels=c("AT2", "REH", "AT2+REH", "NALM-6"))
+data.at2.reh.fuka$CL <- factor(data.at2.reh.fuka$CL, levels=c("NALM-6", "AT2", "REH", "AT2+REH", "AT2+REH\nw/ motif"))
 data.at2.reh.fuka$direction <- factor(data.at2.reh.fuka$direction, levels=c("E/R activated", "E/R repressed", "up- or down-regulated", "up- vs. down-regulated"))
 
 ggplot(data = data.at2.reh.fuka, aes(x = CL, y = log(OR, 2), fill = direction)) +   
