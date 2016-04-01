@@ -178,6 +178,30 @@ macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105
 	mkdir -p macs
 	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_RHD -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
 
+macs/%_runx1Motif_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 != "" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 != "" {print $$3,$$26,$$26+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_runx1Motif_summits.bed.part
+	mv macs/$*_runx1Motif_summits.bed.part macs/$*_runx1Motif_summits.bed 
+	mv $@.part $@
+
+macs/%_norunx1Motif_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 == "" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 == "" {print $$3,$$26,$$26+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_norunx1Motif_summits.bed.part
+	mv macs/$*_norunx1Motif_summits.bed.part macs/$*_norunx1Motif_summits.bed 
+	mv $@.part $@
+
+macs/%_constitutive_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$32 == "constitutive" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$32 == "constitutive" {print $$3,$$26,$$26+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_constitutive_summits.bed.part
+	mv macs/$*_constitutive_summits.bed.part macs/$*_constitutive_summits.bed 
+	mv $@.part $@
+
+macs/%_denovo_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$32 == "de novo" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$32 == "de novo" {print $$3,$$26,$$26+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_denovo_summits.bed.part
+	mv macs/$*_denovo_summits.bed.part macs/$*_denovo_summits.bed 
+	mv $@.part $@
+
 macs/%_model.pdf: macs/%_model.r
 	cd macs && Rscript ../$<
 
@@ -235,6 +259,20 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_RHD_peaks.annotated.with-expr.tsv \
+       homer/ChIP24_AT2_ER_runx1Motif_peaks.annotated.tsv \
+       homer/ChIP24_REH_ER_runx1Motif_peaks.annotated.tsv \
+       homer/ChIP22_NALM6_RUNX1_runx1Motif_peaks.annotated.tsv \
+       homer/ChIP23_NALM6_ER_runx1Motif_peaks.annotated.tsv \
+       homer/ChIP24_AT2_ER_norunx1Motif_peaks.annotated.tsv \
+       homer/ChIP24_REH_ER_norunx1Motif_peaks.annotated.tsv \
+       homer/ChIP22_NALM6_RUNX1_norunx1Motif_peaks.annotated.tsv \
+       homer/ChIP23_NALM6_ER_norunx1Motif_peaks.annotated.tsv \
+       homer/ChIP24_AT2_ER_constitutive_peaks.annotated.tsv \
+       homer/ChIP24_REH_ER_constitutive_peaks.annotated.tsv \
+       homer/ChIP23_NALM6_ER_constitutive_peaks.annotated.tsv \
+       homer/ChIP24_AT2_ER_denovo_peaks.annotated.tsv \
+       homer/ChIP24_REH_ER_denovo_peaks.annotated.tsv \
+       homer/ChIP23_NALM6_ER_denovo_peaks.annotated.tsv \
        motifs/runx1_motifs.homer \
        motifs/er_motifs.homer \
        motifs/rhd_motifs.homer \
@@ -242,7 +280,21 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        motifs/ChIP24_REH_ER_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_motifs.homer \
        motifs/ChIP23_NALM6_ER_motifs.homer \
-       motifs/ChIP23_NALM6_RHD_motifs.homer
+       motifs/ChIP23_NALM6_RHD_motifs.homer \
+       motifs/ChIP24_AT2_ER_runx1Motif_motifs.homer \
+       motifs/ChIP24_REH_ER_runx1Motif_motifs.homer \
+       motifs/ChIP22_NALM6_RUNX1_runx1Motif_motifs.homer \
+       motifs/ChIP23_NALM6_ER_runx1Motif_motifs.homer \
+       motifs/ChIP24_AT2_ER_norunx1Motif_motifs.homer \
+       motifs/ChIP24_REH_ER_norunx1Motif_motifs.homer \
+       motifs/ChIP22_NALM6_RUNX1_norunx1Motif_motifs.homer \
+       motifs/ChIP23_NALM6_ER_norunx1Motif_motifs.homer \
+       motifs/ChIP24_AT2_ER_constitutive_motifs.homer \
+       motifs/ChIP24_REH_ER_constitutive_motifs.homer \
+       motifs/ChIP23_NALM6_ER_constitutive_motifs.homer \
+       motifs/ChIP24_AT2_ER_denovo_motifs.homer \
+       motifs/ChIP24_REH_ER_denovo_motifs.homer \
+       motifs/ChIP23_NALM6_ER_denovo_motifs.homer
 	
 homer/%_peaks.ucsc.bed: macs/%_peaks.bed
 	mkdir -p homer
@@ -270,10 +322,10 @@ homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed /mnt/projects/fiona/data/run
 	
 motifs/%_motifs.homer: homer/%_peaks.ucsc.bed
 	mkdir -p motifs/$*
-	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -size 200 -mask -p 15 -fdr 100 > $@.part
+	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -size 200 -mask -p 15 -fdr 100 -dumpFasta > $@.part
 	mv $@.part $@
 
-homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv /mnt/projects/fiona/scripts/annotate-peaks.R
+homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv /mnt/projects/fiona/scripts/annotate-peaks.R
 	Rscript /mnt/projects/fiona/scripts/annotate-peaks.R --peak-file $(word 1, $^) --summit-file macs/$*_summits.bed --out-file $@.part
 	mv $@.part $@
 	
