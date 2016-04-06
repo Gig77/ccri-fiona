@@ -294,7 +294,12 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        motifs/ChIP23_NALM6_ER_constitutive_motifs.homer \
        motifs/ChIP24_AT2_ER_denovo_motifs.homer \
        motifs/ChIP24_REH_ER_denovo_motifs.homer \
-       motifs/ChIP23_NALM6_ER_denovo_motifs.homer
+       motifs/ChIP23_NALM6_ER_denovo_motifs.homer \
+       motifs/ChIP24_AT2_ER.runx1_hits.tsv      motifs/ChIP24_AT2_ER.ets_hits.tsv      motifs/ChIP24_AT2_ER.ebf_hits.tsv \
+       motifs/ChIP24_REH_ER.runx1_hits.tsv      motifs/ChIP24_REH_ER.ets_hits.tsv      motifs/ChIP24_REH_ER.ebf_hits.tsv \
+       motifs/ChIP23_NALM6_ER.runx1_hits.tsv    motifs/ChIP23_NALM6_ER.ets_hits.tsv    motifs/ChIP23_NALM6_ER.ebf_hits.tsv \
+       motifs/ChIP22_NALM6_RUNX1.runx1_hits.tsv motifs/ChIP22_NALM6_RUNX1.ets_hits.tsv motifs/ChIP22_NALM6_RUNX1.ebf_hits.tsv
+       
 	
 homer/%_peaks.ucsc.bed: macs/%_peaks.bed
 	mkdir -p homer
@@ -323,6 +328,21 @@ homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed /mnt/projects/fiona/data/run
 motifs/%_motifs.homer: homer/%_peaks.ucsc.bed
 	mkdir -p motifs/$*
 	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -size 200 -mask -p 15 -fdr 100 -dumpFasta > $@.part
+	mv $@.part $@
+
+motifs/%.runx1_hits.tsv: homer/%_peaks.ucsc.bed /mnt/projects/fiona/data/runx1.motif
+	$(HOMER) findMotifsGenome.pl $(word 1, $^) hg19 motifs/$*.tmp -find $(word 2, $^) > $@.part
+	rm -rf motifs/$*.tmp
+	mv $@.part $@
+
+motifs/%.ebf_hits.tsv: homer/%_peaks.ucsc.bed /mnt/projects/fiona/data/ebf.motif
+	$(HOMER) findMotifsGenome.pl $(word 1, $^) hg19 motifs/$*.tmp -find $(word 2, $^) > $@.part
+	rm -rf motifs/$*.tmp
+	mv $@.part $@
+
+motifs/%.ets_hits.tsv: homer/%_peaks.ucsc.bed /mnt/projects/fiona/data/ets1.motif
+	$(HOMER) findMotifsGenome.pl $(word 1, $^) hg19 motifs/$*.tmp -find $(word 2, $^) > $@.part
+	rm -rf motifs/$*.tmp
 	mv $@.part $@
 
 homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv /mnt/projects/fiona/scripts/annotate-peaks.R

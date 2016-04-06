@@ -344,5 +344,191 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("NALM-6 motif overlap de novo E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+# motif frequency proximal vs. distal
+
+#pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
+
+library(vcd)
+
+# AT2 RUNX1
+
+in.promoter <- at2$`Distance to TSS` >= -5000 & at2$`Distance to TSS` <= 1000
+has.motif <- !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("RUNX1+", "RUNX1-")))
+)
+mosaic(t, pop=F, main=sprintf("AT2 p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# AT2 ETS
+
+in.promoter <- at2$`Distance to TSS` >= -5000 & at2$`Distance to TSS` <= 1000
+has.motif <- !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("ETS+", "ETS-")))
+)
+mosaic(t, pop=F, main=sprintf("AT2 p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# AT2 EBF
+
+in.promoter <- at2$`Distance to TSS` >= -5000 & at2$`Distance to TSS` <= 1000
+has.motif <- !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("EBF+", "EBF-")))
+)
+mosaic(t, pop=F, main=sprintf("AT2 p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# REH RUNX1
+
+in.promoter <- reh$`Distance to TSS` >= -5000 & reh$`Distance to TSS` <= 1000
+has.motif <- !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("RUNX1+", "RUNX1-")))
+)
+mosaic(t, pop=F, main=sprintf("REH p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# REH ETS
+
+in.promoter <- reh$`Distance to TSS` >= -5000 & reh$`Distance to TSS` <= 1000
+has.motif <- !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("ETS+", "ETS-")))
+)
+mosaic(t, pop=F, main=sprintf("REH p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# REH EBF
+
+in.promoter <- reh$`Distance to TSS` >= -5000 & reh$`Distance to TSS` <= 1000
+has.motif <- !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("EBF+", "EBF-")))
+)
+mosaic(t, pop=F, main=sprintf("REH p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# NALM-6 ER RUNX1
+
+in.promoter <- nalm6.er$`Distance to TSS` >= -5000 & nalm6.er$`Distance to TSS` <= 1000
+has.motif <- !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("RUNX1+", "RUNX1-")))
+)
+mosaic(t, pop=F, main=sprintf("NALM-6 ER p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# NALM-6 ER ETS
+
+in.promoter <- nalm6.er$`Distance to TSS` >= -5000 & nalm6.er$`Distance to TSS` <= 1000
+has.motif <- !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("ETS+", "ETS-")))
+)
+mosaic(t, pop=F, main=sprintf("NALM-6 ER p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# NALM-6 ER EBF
+
+in.promoter <- nalm6.er$`Distance to TSS` >= -5000 & nalm6.er$`Distance to TSS` <= 1000
+has.motif <- !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("EBF+", "EBF-")))
+)
+mosaic(t, pop=F, main=sprintf("NALM-6 ER p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# NALM-6 RUNX1 RUNX1
+
+in.promoter <- nalm6.runx1$`Distance to TSS` >= -5000 & nalm6.runx1$`Distance to TSS` <= 1000
+has.motif <- !is.na(nalm6.runx1$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("RUNX1+", "RUNX1-")))
+)
+mosaic(t, pop=F, main=sprintf("NALM-6 RUNX1 p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# NALM-6 RUNX1 ETS
+
+in.promoter <- nalm6.runx1$`Distance to TSS` >= -5000 & nalm6.runx1$`Distance to TSS` <= 1000
+has.motif <- !is.na(nalm6.runx1$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("ETS+", "ETS-")))
+)
+mosaic(t, pop=F, main=sprintf("NALM-6 RUNX1 p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
+# NALM-6 RUNX1 EBF
+
+in.promoter <- nalm6.runx1$`Distance to TSS` >= -5000 & nalm6.runx1$`Distance to TSS` <= 1000
+has.motif <- !is.na(nalm6.runx1$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)
+t <- as.table(matrix(c(sum(in.promoter & has.motif), 
+                       sum(!in.promoter & has.motif),
+                       sum(in.promoter & !has.motif), 
+                       sum(!in.promoter & !has.motif)),
+                     nrow = 2,
+                     dimnames = list('Region'=c("Promoter+", "Promoter-"), 
+                                     'Motif'=c("EBF+", "EBF-")))
+)
+mosaic(t, pop=F, main=sprintf("NALM-6 RUNX1 p=%.2g", fisher.test(t)$p.value))
+labeling_cells(text=t)(t)
+
 dev.off()
 

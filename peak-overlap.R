@@ -29,8 +29,8 @@ nalm6.er.gr <- GRanges(seqnames = nalm6.er$Chr, ranges=IRanges(nalm6.er$Start, n
 
 o.at2.reh <- findOverlaps(at2.gr, reh.gr, minoverlap=minoverlap)
 o.nalm6.runx1.er <- findOverlaps(nalm6.runx1.gr, nalm6.er.gr, minoverlap=minoverlap)
-o.nalm6.at2 <- findOverlaps(nalm6.er.gr, at2.gr, minoverlap=minoverlap)
-o.nalm6.reh <- findOverlaps(nalm6.er.gr, reh.gr, minoverlap=minoverlap)
+o.nalm6er.at2 <- findOverlaps(nalm6.er.gr, at2.gr, minoverlap=minoverlap)
+o.nalm6er.reh <- findOverlaps(nalm6.er.gr, reh.gr, minoverlap=minoverlap)
 
 pdf("/mnt/projects/fiona/results/peak-overlaps.pdf", height=10)
 
@@ -73,7 +73,7 @@ par(mfrow=c(1,1))
 nalm6.runx1.and.er <- round((length(unique(o.nalm6.runx1.er@queryHits)) + length(unique(o.nalm6.runx1.er@subjectHits)))/2)
 nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.nalm6.runx1.er@queryHits))
 nalm6.er.only <- length(nalm6.er.gr) - length(unique(o.nalm6.runx1.er@subjectHits))
-plot(Venn(SetNames = c("NALM6 RUNX1", "NALM6 ER"), Weight = c("10" = nalm6.runx1.only, "11" = nalm6.runx1.and.er, "01" = nalm6.er.only)), doWeights=TRUE, type="circles")
+plot(Venn(SetNames = c("NALM6 ER", "NALM6 RUNX1"), Weight = c("10" = nalm6.er.only, "11" = nalm6.runx1.and.er, "01" = nalm6.runx1.only)), doWeights=TRUE, type="circles")
 grid.text(sprintf("ChIP-seq peak overlap (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
 # RUNX1 vs E/R peak score distributions
@@ -106,9 +106,9 @@ par(mfrow=c(1,1))
 
 #source("https://bioconductor.org/biocLite.R") ; biocLite("ChIPpeakAnno")
 library(ChIPpeakAnno)
-o.nalm6.at2.reh <- findOverlapsOfPeaks(nalm6.er.gr, at2.gr, reh.gr, minoverlap=minoverlap, ignore.strand=TRUE, connectedPeaks = "merge")
-venn.counts <- o.nalm6.at2.reh$venn_cnt[,4] 
-names(venn.counts) <- apply(o.nalm6.at2.reh$venn_cnt[,1:3], 1, function(x) paste0(x, collapse="")) 
+o.nalm6er.at2.reh <- findOverlapsOfPeaks(nalm6.er.gr, at2.gr, reh.gr, minoverlap=minoverlap, ignore.strand=TRUE, connectedPeaks = "merge")
+venn.counts <- o.nalm6er.at2.reh$venn_cnt[,4] 
+names(venn.counts) <- apply(o.nalm6er.at2.reh$venn_cnt[,1:3], 1, function(x) paste0(x, collapse="")) 
 venn <- compute.Venn(Venn(SetNames = c("NALM6 ER", "AT2", "REH"), Weight = venn.counts), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
 grid.newpage()
@@ -119,22 +119,47 @@ grid.text(sprintf("ChIP-seq peak overlap (min. score = %d, min. overlap = %d bp)
 
 par(mfrow=c(3,1))
 
-nalm6.er.unique <- as.integer(gsub("nalm6.er.gr__", "", unlist(o.nalm6.at2.reh$peaklist$nalm6.er.gr$peakNames)))
+nalm6.er.unique <- as.integer(gsub("nalm6.er.gr__", "", unlist(o.nalm6er.at2.reh$peaklist$nalm6.er.gr$peakNames)))
 hist(log(nalm6.er.gr$mcols.score[nalm6.er.unique], 2), breaks=50, col=rgb(0,0,1,0.5), xlim=c(1,10), xlab="Peak score (log2)", main="NALM6 E/R peak score distribution")
 hist(log(nalm6.er.gr$mcols.score[-nalm6.er.unique], 2), breaks=50, col=rgb(1,0,0,0.5), add=T)
 legend("topright", c("only NALM6", "shared with AT or REH"), fill=c("blue", "red"))
 
-at2.unique <- as.integer(gsub("at2.gr__", "", c(unlist(o.nalm6.at2.reh$peaklist$at2.gr$peakNames), grep("at2.gr", unlist(unlist(o.nalm6.at2.reh$peaklist$`at2.gr///reh.gr`$peakNames)), value=T))))
+at2.unique <- as.integer(gsub("at2.gr__", "", c(unlist(o.nalm6er.at2.reh$peaklist$at2.gr$peakNames), grep("at2.gr", unlist(unlist(o.nalm6er.at2.reh$peaklist$`at2.gr///reh.gr`$peakNames)), value=T))))
 hist(log(at2.gr$mcols.score[at2.unique], 2), breaks=50, col=rgb(0,0,1,0.5), xlim=c(1,10), ylim=c(0, 450), xlab="Peak score (log2)", main="AT2 peak score distribution")
 hist(log(at2.gr$mcols.score[-at2.unique], 2), breaks=50, col=rgb(1,0,0,0.5), add=T)
 legend("topright", c("only AT2", "shared with NALM6 E/R"), fill=c("blue", "red"))
 
-reh.unique <- as.integer(gsub("reh.gr__", "", c(unlist(o.nalm6.at2.reh$peaklist$reh.gr$peakNames), grep("reh.gr", unlist(unlist(o.nalm6.at2.reh$peaklist$`at2.gr///reh.gr`$peakNames)), value=T))))
+reh.unique <- as.integer(gsub("reh.gr__", "", c(unlist(o.nalm6er.at2.reh$peaklist$reh.gr$peakNames), grep("reh.gr", unlist(unlist(o.nalm6er.at2.reh$peaklist$`at2.gr///reh.gr`$peakNames)), value=T))))
 hist(log(reh.gr$mcols.score[reh.unique], 2), breaks=50, col=rgb(0,0,1,0.5), xlim=c(1,10), ylim=c(0, 600), xlab="Peak score (log2)", main="REH peak score distribution")
 hist(log(reh.gr$mcols.score[-reh.unique], 2), breaks=50, col=rgb(1,0,0,0.5), add=T)
 legend("topright", c("only REH", "shared with NALM6 E/R"), fill=c("blue", "red"))
 
 par(mfrow=c(1,1))
+
+# venn diagram AT2/REH vs. NALM-6 RUNX1 (= de novo vs. constitutive peaks)
+
+o.nalm6runx1.at2 <- findOverlaps(nalm6.runx1.gr, at2.gr, minoverlap=minoverlap)
+o.nalm6runx1.reh <- findOverlaps(nalm6.runx1.gr, reh.gr, minoverlap=minoverlap)
+
+at2.and.nalm6.runx1 <- round((length(unique(o.nalm6runx1.at2@queryHits)) + length(unique(o.nalm6runx1.at2@subjectHits)))/2)
+at2.only <- length(at2.gr) - length(unique(o.nalm6runx1.at2@subjectHits))
+nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.nalm6runx1.at2@queryHits))
+plot(Venn(SetNames = c("AT2", "NALM6 RUNX1"), Weight = c("10" = at2.only, "11" = at2.and.nalm6.runx1, "01" = nalm6.runx1.only)), doWeights=TRUE, type="circles")
+grid.text(sprintf("AT2 E/R de novo vs. constitutive peaks (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+reh.and.nalm6.runx1 <- round((length(unique(o.nalm6runx1.reh@queryHits)) + length(unique(o.nalm6runx1.reh@subjectHits)))/2)
+reh.only <- length(reh.gr) - length(unique(o.nalm6runx1.reh@subjectHits))
+nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.nalm6runx1.reh@queryHits))
+plot(Venn(SetNames = c("REH", "NALM6 RUNX1"), Weight = c("10" = reh.only, "11" = reh.and.nalm6.runx1, "01" = nalm6.runx1.only)), doWeights=TRUE, type="circles")
+grid.text(sprintf("REH E/R de novo vs. constitutive peaks (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+# peaks found in all three E/R chips but not in RUNX1 chip (consensus de novo)
+
+o.at2.reh.nalm6er.nalm6runx1 <- findOverlapsOfPeaks(at2.gr, reh.gr, nalm6.er.gr, nalm6.runx1.gr, minoverlap=minoverlap, ignore.strand=TRUE, connectedPeaks = "merge")
+denovo.peaknames <- unlist(o.at2.reh.nalm6er.nalm6runx1$peaklist$`at2.gr///reh.gr///nalm6.er.gr`$peakNames)
+denovo <- at2[unique(as.integer(gsub("at2.gr__", "", grep("at2.gr", denovo.peaknames, value=T)))),]
+#denovo <- denovo[denovo$`Distance to TSS` >= -5000 & denovo$`Distance to TSS` <= 1000,]
+write.table(denovo, "/mnt/projects/fiona/results/er-consensus-peaks-not-runx1.xls", row.names = F, col.names = T, quote = F, sep="\t", na = "")
 
 # scatter plot peak scores
 

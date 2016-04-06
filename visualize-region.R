@@ -20,6 +20,20 @@ regions = rbind(regions, setNames(data.frame("ID2", "chr2", 8808479, 8832267, "m
 regions = rbind(regions, setNames(data.frame("DDIT4", "chr10", 74017308, 74050859, "meta", stringsAsFactors = F), names(regions)))
 regions = rbind(regions, setNames(data.frame("SPIB", "chr19", 50915546, 50940239, "meta", stringsAsFactors = F), names(regions)))
 regions = rbind(regions, setNames(data.frame("BCL6", "chr3", 187438180, 187470003, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("EPOR", "chr19", 11479311, 11502877, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("MAD2L1", "chr4", 120972040, 120994919, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("VEGFA", "chr6", 43727798, 43770804, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("CDKN1A", "chr6", 36639099, 36659153, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("GZMB", "chr14", 25095203, 25108164, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("DNMT3a", "chr2", 25438556, 25592146, "meta", stringsAsFactors = F), names(regions)))
+
+# E/R "unique" peaks
+
+regions = rbind(regions, setNames(data.frame("LOC100129046", "chr1", 94050000, 94072512, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("SEMA4A", "chr1", 156104807, 156148343, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("TSPEAR", "chr21", 45900577, 45949376, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("SH3BP1", "chr22", 38026127, 38041161, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("ZCCHC5", "chrX", 77907787, 77921669, "meta", stringsAsFactors = F), names(regions)))
 
 pdf("/mnt/projects/fiona/results/region-plots/regions.chipseq.coverage.pdf", height=8, width=12)
 
@@ -34,9 +48,13 @@ for (i in 1:nrow(regions)) {
   ideogram.track <- IdeogramTrack(genome = "hg19", chromosome = chr, showId=F, showTitle=T, 
                                   name=chr, fontcolor.title="black", background.title="white", rotation.title=0, fontsize=15)
   axis.track <- GenomeAxisTrack(labelPos="above", name=chr, lwd=0.5, cex=0.8, col="black", fontcolor="black", fontface=2)
-  gene.track <- BiomartGeneRegionTrack(genome = "hg19", chromosome = chr, start = start, end = end, 
+  
+  # weird behaviour of gviz: it won't give us any genes with ucsc chr identifiers, but if we use no 'chr' prefix we have to add it afterwards again
+  gene.track <- BiomartGeneRegionTrack(genome = "hg19", chromosome = gsub("chr", "", chr), start = start, end = end, 
                                        name = "", showId=TRUE, stacking="squish", collapseTranscripts = collapseTranscripts,
                                        fontsize=16, fontcolor.group="black", background.title="white")
+#  seqlevels(ranges(gene.track)) <- sprintf("chr%s", seqlevels(ranges(gene.track)))
+#  chromosome(gene.track)=chr
   
   chromosome(at2.er.chip) <- chr ; at2.er.chip.region <- subset(at2.er.chip, start, end)
   chromosome(at2.er.input) <- chr ; at2.er.input.region <- subset(at2.er.input, start, end)
