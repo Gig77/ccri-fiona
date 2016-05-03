@@ -48,6 +48,9 @@ peaks$'EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs' <- ifelse(is.n
 peaks <- convertMotifDist('GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)')
 peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer No. motifs' <- ifelse(is.na(peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)'), NA, sapply(strsplit(peaks$'GATA3(Zf)/iTreg-Gata3-ChIP-Seq(GSE20898)/Homer Distance From Peak(sequence,strand,conservation)', ","), length))
 
+peaks <- convertMotifDist('ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer Distance From Peak(sequence,strand,conservation)')
+peaks$'ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs' <- ifelse(is.na(peaks$'ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer Distance From Peak(sequence,strand,conservation)'), NA, sapply(strsplit(peaks$'ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer Distance From Peak(sequence,strand,conservation)', ","), length))
+
 names(peaks) <- gsub("Distance From Peak(sequence,strand,conservation)", "Distance From Summit", names(peaks), fixed=T)
 
 peaks.ann <- peaks
@@ -77,8 +80,10 @@ peaks.gr <- GRanges(seqnames=peaks.ann$Chr, ranges=IRanges(start=peaks.ann$Start
 nalm6.runx1 <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv", stringsAsFactors = F, check.names = F)
 nalm6.runx1.gr <- GRanges(seqnames = nalm6.runx1$Chr, ranges=IRanges(nalm6.runx1$Start, nalm6.runx1$End))
 o.nalm6.runx1 <- findOverlaps(peaks.gr, nalm6.runx1.gr, minoverlap=100, ignore.strand=TRUE)
+better_peak <- peaks.ann$`Peak Score`[o.nalm6.runx1@queryHits] > nalm6.runx1$`Peak Score`[o.nalm6.runx1@subjectHits]
 peaks.ann$runx1_overlap <- "de novo"
-peaks.ann$runx1_overlap[unique(o.nalm6.runx1@queryHits)] <- "constitutive"
+peaks.ann$runx1_overlap[unique(o.nalm6.runx1@queryHits[better_peak])] <- "constitutive_better"
+peaks.ann$runx1_overlap[unique(o.nalm6.runx1@queryHits[!better_peak])] <- "constitutive_worse"
 
 #-----------------------------------------------------------------
 # annotate expression datasets
@@ -283,17 +288,26 @@ peaks.ann <- merge(peaks.ann, kasia.HvsL, by.x = "Gene Name", by.y = "Gene", all
 # annotate other ChIP-seq datasets
 #-----------------------------------------------------------------
 
-# ChIP-seq Tijssen et al. 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21571218)
-tijssen <- read.csv("/mnt/projects/chrisi/results/chipseq/Tijssen_all.genes.txt",  stringsAsFactors=F, sep="\t", header=T, fill=T)
-tijssen <- data.frame(Gene=tijssen$Runx1_alone, tijssen2011.chipseq.runx1=tijssen$Runx1_alone)
-tijssen <- tijssen[!duplicated(tijssen$Gene),]
-peaks.ann <- merge(peaks.ann, tijssen, by.x = "Gene Name", by.y = "Gene", all.x = T)
+# ChIP-seq Tijssen et al. 2011 (http://www.ncbi.nlm.nih.gov/pubmed/21571218) - primary human megakaryocytes
+tijssen <- read.delim("/mnt/projects/fiona/results/Tijssen_2011_TableS1_peak_coordinates.hg19.txt")
+tijssen <- makeGRangesFromDataFrame(tijssen, keep.extra.columns = T)
+o.tijssen <- findOverlaps(peaks.gr, tijssen, minoverlap=100, ignore.strand=TRUE)
+if (length(o.tijssen) > 0) {
+  o.tijssen <- data.frame(peak=peaks[o.tijssen@queryHits,1], factor=tijssen[o.tijssen@subjectHits]$factor)
+  o.tijssen <- o.tijssen[!duplicated(o.tijssen),]
+  o.tijssen <- aggregate(factor~peak, paste, collapse="_", data=o.tijssen)
+  o.tijssen$factor <- sapply(o.tijssen$factor, function(x) paste(sort(unique(strsplit(x, "_")[[1]])), collapse=","))
+  peaks.ann <- merge(peaks.ann, o.tijssen, by.x = 2, by.y = 1, all.x = T)
+  colnames(peaks.ann)[length(peaks.ann)] <- "Tijssen2011.chipseq.human.megakaryocytes"
+} else {
+  peaks.ann$Tijssen2011.chipseq.human.megakaryocytes <- NA
+}
 
-# ChIP-seq Wilson et al. 2010 (http://www.ncbi.nlm.nih.gov/pubmed/20887958)
+# ChIP-seq Wilson et al. 2010 (http://www.ncbi.nlm.nih.gov/pubmed/20887958) - mosue HPC-7 cells
 wilson <- read.csv("/mnt/projects/chrisi/results/chipseq/Wilson_Gottgens_ChIPseq.txt",  stringsAsFactors=F, sep="\t", header=T, fill=T)
 wilson <- wilson[!is.na(wilson$Runx1) & wilson$Runx1 != "",]
 library(biomaRt)
-human = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice" ,dataset="hsapiens_gene_ensembl") # GRCh37, v75
+human = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="feb2014.archive.ensembl.org", path="/biomart/martservice" , dataset="hsapiens_gene_ensembl") # GRCh37, v75
 mouse = useMart(biomart="ENSEMBL_MART_ENSEMBL", host="feb2014.archive.ensembl.org", dataset="mmusculus_gene_ensembl") # GRCm38, v75
 humOrt <- getLDS(attributes = c("mgi_symbol"), filters = "mgi_symbol", values=wilson$Runx1, mart = mouse, attributesL = c("hgnc_symbol", "entrezgene"), martL = human)
 wilson <- humOrt[!is.na(humOrt$EntrezGene.ID), c("HGNC.symbol", "MGI.symbol")]
@@ -303,7 +317,7 @@ wilson <- aggregate(wilson2010.chipseq.runx1.mouse~Gene, paste, collapse="|", da
 wilson <- wilson[wilson$Gene != "",]
 peaks.ann <- merge(peaks.ann, wilson, by.x = "Gene Name", by.y = "Gene", all.x = T)
 
-# ChIP-seq Niebuhr et. al 2013 (http://www.ncbi.nlm.nih.gov/pubmed/23704093)
+# ChIP-seq Niebuhr et. al 2013 (http://www.ncbi.nlm.nih.gov/pubmed/23704093) - BMiFLT3 (15-3) cells (proB cells from a murine BCP-ALL)
 niebuhr <-  read.csv("/mnt/projects/chrisi/results/chipseq/Niebuhr_TableS3_Runx1 Peaks Called in ProB-Cells.txt", stringsAsFactors=F, sep="\t", header=T, fill=T)
 #niebuhr <- niebuhr[niebuhr$dist_tss > -5000 & niebuhr$dist_tss < 1000,]
 #niebuhr <- niebuhr[niebuhr$score >= 100,]
