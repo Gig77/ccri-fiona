@@ -2,19 +2,21 @@ options(warn=1)
 library(optparse)
 
 option_list <- list(
-  make_option("--peak-file", type="character", help="Annotated ChIP-seq peaks from Homer"),
+  make_option("--homer-peak-file", type="character", help="Annotated ChIP-seq peaks from Homer"),
+  make_option("--macs-peak-file", type="character", help="(MACS) BED peak file with additional columns to add to output"),
   make_option("--summit-file", type="character", help="Peak summits (MACS output, BED format)"),
   make_option("--out-file", type="character", help="Output file")
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
-#opt <- data.frame('peak-file'= "/mnt/projects/fiona/results/homer/runx1_peaks.annotated.tsv", 'summit-file'= "/mnt/projects/fiona/results/macs/runx1_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/runx1_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
-#opt <- data.frame('peak-file'= "/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv", 'summit-file'= "/mnt/projects/fiona/results/macs/ChIP22_NALM6_RUNX1_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
-stopifnot(!is.null(opt$'peak-file'))
+#opt <- data.frame('homer-peak-file'= "/mnt/projects/fiona/results/homer/runx1_peaks.annotated.tsv", 'summit-file'= "/mnt/projects/fiona/results/macs/runx1_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/runx1_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
+#opt <- data.frame('homer-peak-file'= "/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv", 'summit-file'= "/mnt/projects/fiona/results/macs/ChIP22_NALM6_RUNX1_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
+#opt <- data.frame('homer-peak-file'= "/mnt/projects/fiona/results/homer/diffbind_ER_vs_RUNX_peaks.annotated.tsv", 'macs-peak-file'= "/mnt/projects/fiona/results/macs/diffbind_ER_vs_RUNX_peaks.bed", 'summit-file'= "/mnt/projects/fiona/results/macs/diffbind_ER_vs_RUNX_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/diffbind_ER_vs_RUNX_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
+stopifnot(!is.null(opt$'homer-peak-file'))
 stopifnot(!is.null(opt$'out-file'))
 stopifnot(!is.null(opt$'summit-file'))
 
-peaks <- read.delim(opt$'peak-file', check.names = F, stringsAsFactors = F)
+peaks <- read.delim(opt$'homer-peak-file', check.names = F, stringsAsFactors = F)
 
 # merge summit coordinate
 summit <- read.delim(opt$'summit-file', check.names = F, stringsAsFactors = F, header = F)
@@ -329,7 +331,14 @@ niebuhr <- aggregate(niebuhr2013.chipseq.runx1.mouse~Gene, paste, collapse="|", 
 niebuhr <- niebuhr[niebuhr$Gene != "",]
 peaks.ann <- merge(peaks.ann, niebuhr, by.x = "Gene Name", by.y = "Gene", all.x = T)
 
-
+# add additional columns present in initial (pre-annotation) BED file (didn't find a way to make HOMER preserve such columns when annotating peaks)
+if (!is.null(opt$`macs-peak-file`)) {
+  macs.peaks <- read.delim(opt$'macs-peak-file', check.names = F, stringsAsFactors = F, header = F)
+  macs.peaks$V1 <- paste0("chr", macs.peaks$V1)
+  macs.peaks$V2 <- macs.peaks$V2 + 1
+  names(macs.peaks) <- paste0(opt$`macs-peak-file`, ".", names(macs.peaks))
+  peaks.ann <- merge(peaks.ann, macs.peaks, by.x=c(2, 3, 4, 5, 7), by.y=c(4, 1, 2, 3, 5), all.x = T)
+}
 
 # sort and write output
 peaks.ann <- peaks.ann[order(peaks.ann$'Peak Score', decreasing = T),]

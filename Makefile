@@ -4,7 +4,7 @@ SHELL=/bin/bash  # required to make pipefail work
 LOG = perl -ne 'use POSIX qw(strftime); $$|=1; print strftime("%F %02H:%02M:%S ", localtime), $$ARGV[0], "$@: $$_";'
 
 PROJECT_HOME=/mnt/projects/fiona
-DOCKER=docker run -it --rm --net=host -e DOCKER_UID=$$(id -u) -e DOCKER_UNAME=$$(id -un) -e DOCKER_GID=$$(id -g) -e DOCKER_GNAME=$$(id -gn) -e DOCKER_HOME=$$HOME -v /home:/home -v /data_synology:/data_synology -v /data:/data -v /data2:/data2 -v /home/cf/fiona/results/current:$(PROJECT_HOME)/results -v /home/cf/fiona/data:$(PROJECT_HOME)/data -w $$(pwd)
+DOCKER=docker run -i --rm --net=host -e DOCKER_UID=$$(id -u) -e DOCKER_UNAME=$$(id -un) -e DOCKER_GID=$$(id -g) -e DOCKER_GNAME=$$(id -gn) -e DOCKER_HOME=$$HOME -v /home:/home -v /data_synology:/data_synology -v /data:/data -v /data2:/data2 -v /home/cf/fiona/results/current:$(PROJECT_HOME)/results -v /home/cf/fiona/data:$(PROJECT_HOME)/data -w $$(pwd)
 MACS2=$(DOCKER) biowaste:5000/ccri/macs-2.0.9 macs2
 HOMER=$(DOCKER) -v /home/cf/fiona/results/current/homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt:/usr/local/homer/data/genomes/hg19/annotations/custom/Enhancer.ann.txt biowaste:5000/ccri/homer-4.7
 BWA=/data_synology/software/bwa-0.7.12/bwa
@@ -258,6 +258,10 @@ macs/%_shuffled_peaks.bed: macs/%_peaks.bed /mnt/projects/generic/data/broad/hum
 	mv macs/$*_shuffled_summits.bed.part macs/$*_shuffled_summits.bed 
 	mv $@.part $@
 
+macs/diffbind_ER_vs_RUNX_peaks.bed: /mnt/projects/fiona/scripts/diffBind.R
+	Rscript $< 
+	mv $@.part $@
+	
 macs/%_model.pdf: macs/%_model.r
 	cd macs && Rscript ../$<
 
@@ -338,7 +342,8 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_better_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_worse_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_shuffled_peaks.annotated.with-expr.tsv \
-       homer/ChIP23_NALM6_RHD_peaks.annotated.with-expr.tsv
+       homer/ChIP23_NALM6_RHD_peaks.annotated.with-expr.tsv \
+       homer/diffbind_ER_vs_RUNX_peaks.annotated.with-expr.tsv
 
 homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt: /mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedHelas3.bed \
 														/mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedHuvec.bed \
@@ -380,7 +385,7 @@ homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif home
 	cat homer/$*_peaks.runx1-motif.bed | grep -v "^track" | sort -k 1,1 -k2g,2g > homer/$*-peak-motifs.sorted.bed
 
 homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv Tijssen_2011_TableS1_peak_coordinates.hg19.txt /mnt/projects/fiona/scripts/annotate-peaks.R
-	Rscript /mnt/projects/fiona/scripts/annotate-peaks.R --peak-file $(word 1, $^) --summit-file macs/$*_summits.bed --out-file $@.part
+	Rscript /mnt/projects/fiona/scripts/annotate-peaks.R --homer-peak-file $(word 1, $^) --macs-peak-file macs/$*_peaks.bed --summit-file macs/$*_summits.bed --out-file $@.part
 	mv $@.part $@
 
 # --------------------------------------------------------------------------------
@@ -438,4 +443,47 @@ wgEncodeDacMapabilityConsensusExcludable.bed:
 	wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDacMapabilityConsensusExcludable.bed.gz
 	gunzip $@.gz
 	sed 's/^chr//' $@ > wgEncodeDacMapabilityConsensusExcludable.nochr.bed
+
+# --------------------------------------------------------------------------------
+# GSEA
+# --------------------------------------------------------------------------------
+
+.PHONY: gsea
+gsea: gsea/diffbind_ER_vs_RUNX.gsea \
+	  gsea/diffbind_ER_vs_RUNX_proteincoding.gsea \
+	  gsea/diffbind_ER_vs_RUNX_proteincoding_promoter.gsea \
+	  gsea/diffbind_ER_vs_RUNX_proteincoding_runxmotif.gsea
+
+gsea/%.rnk: homer/%_peaks.annotated.tsv
+	mkdir -p gsea
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$16 != "" {print $$16,$$6}' $< | sort -u -k1,1 | sort -k2,2nr > $@.part
+	mv $@.part $@
+
+gsea/%_proteincoding.rnk: homer/%_peaks.annotated.tsv
+	mkdir -p gsea
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$16 != "" && $$19 == "protein-coding" {print $$16,$$6}' $< | sort -u -k1,1 | sort -k2,2nr > $@.part
+	mv $@.part $@
+
+gsea/%_proteincoding_promoter.rnk: homer/%_peaks.annotated.tsv
+	mkdir -p gsea
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$16 != "" && $$19 == "protein-coding" && $$10 >= -10000 && $$10 <= 5000 {print $$16,$$6}' $< | sort -u -k1,1 | sort -k2,2nr > $@.part
+	mv $@.part $@
+
+gsea/%_proteincoding_runxmotif.rnk: homer/%_peaks.annotated.tsv
+	mkdir -p gsea
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$16 != "" && $$19 == "protein-coding" && $$22 != "" {print $$16,$$6}' $< | sort -u -k1,1 | sort -k2,2nr > $@.part
+	mv $@.part $@
 	
+gsea/%.gsea: gsea/%.rnk
+	java -cp /data_synology/software/gsea-2.0.13/gsea2-2.0.13.jar -Xmx3048m xtools.gsea.GseaPreranked \
+		-rpt_label $* \
+		-rnk $< \
+		-gmx /mnt/projects/generic/data/msigdb5.0/msigdb.v5.0.symbols.gmt \
+		-collapse false -mode Max_probe -norm meandiv -nperm 100 -scoring_scheme weighted -include_only_symbols true -make_sets true \
+		-rnd_seed 149 \
+		-plot_top_x 300 \
+		-set_max 500 \
+		-set_min 15 \
+		-zip_report false \
+		-gui false \
+		-out gsea

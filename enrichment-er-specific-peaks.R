@@ -8,6 +8,7 @@ nalm6.runx1 <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_
 nalm6.er <- read.delim("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 er.denovo <- read.delim("/mnt/projects/fiona/results/er-consensus-peaks-not-runx1.xls", check.names = F)
 er.better <- read.delim("/mnt/projects/fiona/results/er-consensus-peaks-better-than-runx1.xls", check.names = F)
+er.diffbind <- read.delim("/mnt/projects/fiona/results/homer/ER.diffbind_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 
 # MSigDB 5.0 gene sets
 gmt <- read.delim("/mnt/projects/generic/data/msigdb5.0/msigdb.v5.0.symbols.gmt", stringsAsFactors = F, header = FALSE)
@@ -105,3 +106,15 @@ enr.better <- enrichAll(
 )
 
 write.table(enr.better, "/mnt/projects/fiona/results/genesets-enriched-in-er-peaks-better-than-runx1-peaks.tsv", col.names = T, row.names = F, quote = F, sep = "\t")
+
+# enrichment differentially bound E/R peaks (DiffBind)
+enr.diffbind <- enrichAll(
+  gene.entrez=as.character(unique(er.diffbind$`Entrez ID`)),
+  gene.hgnc=unique(er.diffbind$`Gene Name`),
+  universe.entrez=as.character(unique(c(at2$`Entrez ID`, reh$`Entrez ID`, nalm6.runx1$`Entrez ID`, nalm6.er$`Entrez ID`))),
+  universe.hgnc=unique(c(at2$`Gene Name`, reh$`Gene Name`, nalm6.runx1$`Gene Name`, nalm6.er$`Gene Name`)),
+  pvalueCutoff = 0.05,
+  qvalueCutoff = 0.2
+)
+
+write.table(enr.diffbind, "/mnt/projects/fiona/results/genesets-enriched-in-differentially-bound-peaks-ER-vs-runx1.diffbind.tsv", col.names = T, row.names = F, quote = F, sep = "\t")
