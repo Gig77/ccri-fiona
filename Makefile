@@ -57,7 +57,7 @@ download:
 	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32241_GCCAAT_C80K5ANXX_6_20150930B_20150930.bam
 	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32242_CAGATC_C80K5ANXX_6_20150930B_20150930.bam
 	#wget -c --no-check-certificate --auth-no-challenge --limit-rate=1500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/32243_CTTGTA_C80K5ANXX_6_20150930B_20150930.bam
-	
+
 	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35109_CGATGT_C8918ANXX_8_20151231B_20151231.bam
 	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35110_TGACCA_C8918ANXX_8_20151231B_20151231.bam
 	wget -c --no-check-certificate --auth-no-challenge --limit-rate=11500k --user 'Fiona.Kraler' --password '4oLYn0a6le' http://ngs.csf.ac.at/data/35111_ACAGTG_C8918ANXX_8_20151231B_20151231.bam
@@ -82,7 +82,7 @@ download:
 
 .PHONY: fastqc
 fastqc: $(foreach S, $(SAMPLES_CHIPSEQ) $(SAMPLES_CHIPSEQ_2ND_BATCH), fastqc/$S_fastqc.html)
-	
+
 fastqc/%_fastqc.html: $(PROJECT_HOME)/data/bam/%.bam
 	mkdir -p fastqc/$*.part
 	$(FASTQC) -o fastqc/$*.part -f bam $^
@@ -114,7 +114,7 @@ bwa/%.bwa.sorted.bam: $(PROJECT_HOME)/data/bam/%.bam
 		| $(BWA) samse /mnt/projects/generic/data/broad/human_g1k_v37.fasta - $< \
 		| $(SAMTOOLS) view -Shb -@ 2 - \
 		| $(SAMTOOLS) sort -T bwa/$* -o $@.part -O bam -@ 2 -m 2G \
-		| 2>&1 | $(LOG)		
+		| 2>&1 | $(LOG)
 	mv $@.part $@
 
 bwa/%.bwa.sorted.dupmarked.bam: bwa/%.bwa.sorted.bam
@@ -130,7 +130,7 @@ bwa/%.bwa.sorted.dupmarked.bam: bwa/%.bwa.sorted.bam
 bwa/%.bwa.sorted.filtered.bam: bwa/%.bwa.sorted.bam
 	$(SAMTOOLS) view -bhq 30 $< > $@.part
 	mv $@.part $@
-	 
+
 bwa/%.bwa.sorted.bam.bai: bwa/%.bwa.sorted.bam
 	rm -f $@
 	/data_synology/software/samtools-0.1.19/samtools index $^ $@.part 2>&1 | $(LOG)
@@ -145,7 +145,7 @@ bedtools: bedtools/ChIP24_AT2_ER.zeroInputCoverage.bed \
 		  bedtools/ChIP22_NALM6_RUNX1.zeroInputCoverage.bed \
 		  bedtools/ChIP23_NALM6_ER.zeroInputCoverage.bed \
 		  bedtools/ChIP23_NALM6_RHD.zeroInputCoverage.bed
-		  
+
 hg19.5kb.windows.bed: /mnt/projects/generic/data/broad/human_g1k_v37.chromsizes.tsv $(BEDTOOLS)
 	$(BEDTOOLS) makewindows -g $< -w 5000 > $@.part
 	mv $@.part $@
@@ -169,7 +169,7 @@ bedtools/ChIP23_NALM6_ER.zeroInputCoverage.bed: bwa/35121_ACTTGA_C8202ANXX_3_201
 bedtools/ChIP23_NALM6_RHD.zeroInputCoverage.bed: bwa/35123_TAGCTT_C8202ANXX_3_20160105B_20160105.bwa.sorted.bam hg19.5kb.windows.bed /mnt/projects/generic/data/broad/human_g1k_v37.chromsizes.tsv $(BEDTOOLS)
 	$(SAMTOOLS) view -bhq 10 $< | $(BEDTOOLS) intersect -a $(word 2, $^) -b stdin -g $(word 3, $^) -v -sorted -nobuf > $@.part
 	mv $@.part $@
-	
+
 # --------------------------------------------------------------------------------
 # peak calling (MACS)
 # --------------------------------------------------------------------------------
@@ -216,52 +216,60 @@ macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105
 	mkdir -p macs
 	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_RHD -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
 
+macs/%_topN_peaks.bed: macs/%_peaks.bed macs/%_summits.bed
+	head -5000 <(sort -k5,5nr $<) > $@.part
+	cut -f 4 $@.part | sed 's/peak/summit/' > $@.summitids
+	grep -wf $@.summitids $(word 2, $^) > macs/$*_topN_summits.bed.part
+	mv $@.part $@
+	mv macs/$*_topN_summits.bed.part macs/$*_topN_summits.bed
+	rm $@.summitids
+
 macs/%_runx1Motif_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 != "" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 != "" {print $$3,$$27,$$27+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_runx1Motif_summits.bed.part
-	mv macs/$*_runx1Motif_summits.bed.part macs/$*_runx1Motif_summits.bed 
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 != "" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 != "" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_runx1Motif_summits.bed.part
+	mv macs/$*_runx1Motif_summits.bed.part macs/$*_runx1Motif_summits.bed
 	mv $@.part $@
 
 macs/%_norunx1Motif_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 == "" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 == "" {print $$3,$$27,$$27+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_norunx1Motif_summits.bed.part
-	mv macs/$*_norunx1Motif_summits.bed.part macs/$*_norunx1Motif_summits.bed 
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 == "" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$22 == "" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_norunx1Motif_summits.bed.part
+	mv macs/$*_norunx1Motif_summits.bed.part macs/$*_norunx1Motif_summits.bed
 	mv $@.part $@
 
 macs/%_constitutive_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "constitutive_better" || $$34 == "constitutive_worse") {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "constitutive_better" || $$34 == "constitutive_worse") {print $$3,$$27,$$27+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_constitutive_summits.bed.part
-	mv macs/$*_constitutive_summits.bed.part macs/$*_constitutive_summits.bed 
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "constitutive_better" || $$34 == "constitutive_worse") {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "constitutive_better" || $$34 == "constitutive_worse") {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_constitutive_summits.bed.part
+	mv macs/$*_constitutive_summits.bed.part macs/$*_constitutive_summits.bed
 	mv $@.part $@
 
 macs/%_denovo_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "de novo" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "de novo" {print $$3,$$27,$$27+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_denovo_summits.bed.part
-	mv macs/$*_denovo_summits.bed.part macs/$*_denovo_summits.bed 
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "de novo" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "de novo" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_denovo_summits.bed.part
+	mv macs/$*_denovo_summits.bed.part macs/$*_denovo_summits.bed
 	mv $@.part $@
 
 macs/%_better_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "de novo" || $$34 == "constitutive_better") {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "de novo" || $$34 == "constitutive_better") {print $$3,$$27,$$27+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_better_summits.bed.part
-	mv macs/$*_better_summits.bed.part macs/$*_better_summits.bed 
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "de novo" || $$34 == "constitutive_better") {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "de novo" || $$34 == "constitutive_better") {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_better_summits.bed.part
+	mv macs/$*_better_summits.bed.part macs/$*_better_summits.bed
 	mv $@.part $@
 
 macs/%_worse_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "constitutive_worse" {print $$3,$$4,$$5,$$2,$$7}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "constitutive_worse" {print $$3,$$27,$$27+1,$$2,$$7}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_worse_summits.bed.part
-	mv macs/$*_worse_summits.bed.part macs/$*_worse_summits.bed 
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "constitutive_worse" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "constitutive_worse" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_worse_summits.bed.part
+	mv macs/$*_worse_summits.bed.part macs/$*_worse_summits.bed
 	mv $@.part $@
-	
+
 macs/%_shuffled_peaks.bed: macs/%_peaks.bed /mnt/projects/generic/data/broad/human_g1k_v37.chromsizes.tsv bedtools/%.zeroInputCoverage.bed
-	$(BEDTOOLS) shuffle -chrom -seed 4711 -i $< -g $(word 2, $^) -excl $(word 3, $^) > $@.part
+	$(BEDTOOLS) shuffle -chrom -l 4711 -i $< -g $(word 2, $^) -excl $(word 3, $^) > $@.part
 	awk -F "\t" '{OFS="\t"} {summit=sprintf("%d", $$2+($$3-$$2)/2) ; print $$1,summit,summit+1,$$4,$$5}' $@.part > macs/$*_shuffled_summits.bed.part
-	mv macs/$*_shuffled_summits.bed.part macs/$*_shuffled_summits.bed 
+	mv macs/$*_shuffled_summits.bed.part macs/$*_shuffled_summits.bed
 	mv $@.part $@
 
 macs/diffbind_ER_vs_RUNX_peaks.bed: /mnt/projects/fiona/scripts/diffBind.R
-	Rscript $< 
+	Rscript $<
 	mv $@.part $@
-	
+
 macs/%_model.pdf: macs/%_model.r
 	cd macs && Rscript ../$<
 
@@ -315,6 +323,7 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        homer/er_peaks.annotated.with-expr.tsv \
        homer/rhd_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_peaks.annotated.with-expr.tsv \
+			 homer/ChIP24_AT2_ER_topN_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_runx1Motif_peaks.annotated.tsv \
        homer/ChIP24_AT2_ER_norunx1Motif_peaks.annotated.tsv \
        homer/ChIP24_AT2_ER_constitutive_peaks.annotated.tsv \
@@ -323,6 +332,7 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_worse_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_shuffled_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_peaks.annotated.with-expr.tsv \
+			 homer/ChIP24_REH_ER_topN_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_runx1Motif_peaks.annotated.tsv \
        homer/ChIP24_REH_ER_norunx1Motif_peaks.annotated.tsv \
        homer/ChIP24_REH_ER_constitutive_peaks.annotated.tsv \
@@ -331,10 +341,12 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_worse_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_shuffled_peaks.annotated.with-expr.tsv \
        homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv \
+			 homer/ChIP22_NALM6_RUNX1_topN_peaks.annotated.with-expr.tsv \
        homer/ChIP22_NALM6_RUNX1_runx1Motif_peaks.annotated.tsv \
        homer/ChIP22_NALM6_RUNX1_norunx1Motif_peaks.annotated.tsv \
        homer/ChIP22_NALM6_RUNX1_shuffled_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv \
+			 homer/ChIP23_NALM6_ER_topN_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_runx1Motif_peaks.annotated.tsv \
        homer/ChIP23_NALM6_ER_norunx1Motif_peaks.annotated.tsv \
        homer/ChIP23_NALM6_ER_constitutive_peaks.annotated.tsv \
@@ -355,11 +367,15 @@ homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt: /mnt/projects/fiona/data
 		| perl -lane '$$id++; print "Enhancer-$$id\t$$F[0]\t$$F[1]\t$$F[2]\t0\tEnhancer"' > $@.part
 	mv $@.part $@
 
-motifs/all_motifs.motif: /mnt/projects/fiona/data/runx1.motif /mnt/projects/fiona/data/ets1.motif /mnt/projects/fiona/data/ebf.motif /mnt/projects/fiona/data/gata3.motif /mnt/projects/fiona/data/ets_runx.motif
+motifs/all_motifs.motif: /mnt/projects/fiona/data/runx1.motif \
+												 /mnt/projects/fiona/data/ets1.motif \
+												 /mnt/projects/fiona/data/ebf.motif \
+												 /mnt/projects/fiona/data/gata3.motif \
+												 /mnt/projects/fiona/data/ets_runx.motif
 	mkdir -p motifs
 	cat $^ > $@.part
 	mv $@.part $@
-	       
+
 homer/%_peaks.ucsc.bed: macs/%_peaks.bed
 	mkdir -p homer
 	cat $< | perl -ne 'if (/^(\d|X|Y)/) { print "chr$$_" } else { print $$_ }' > $@.part
@@ -367,7 +383,7 @@ homer/%_peaks.ucsc.bed: macs/%_peaks.bed
 
 Tijssen_2011_TableS1_peak_coordinates.hg19.txt: /mnt/projects/fiona/scripts/liftover_tijssen.R /mnt/projects/fiona/data/Tijssen_2011_TableS1_peak_coordinates.txt
 	Rscript /mnt/projects/fiona/scripts/liftover_tijssen.R
-	
+
 homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt
 	mkdir -p homer/$*
 	$(HOMER) annotatePeaks.pl \
@@ -389,13 +405,14 @@ homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execu
 	mv $@.part $@
 
 # --------------------------------------------------------------------------------
-# peak annotation (Homer)
+# motif discovery (Homer)
 # --------------------------------------------------------------------------------
 .PHONY: motifs
 motifs: motifs/runx1_motifs.homer \
        motifs/er_motifs.homer \
        motifs/rhd_motifs.homer \
        motifs/ChIP24_AT2_ER_motifs.homer \
+			 motifs/ChIP24_AT2_ER_topN_motifs.homer \
        motifs/ChIP24_AT2_ER_runx1Motif_motifs.homer \
        motifs/ChIP24_AT2_ER_norunx1Motif_motifs.homer \
        motifs/ChIP24_AT2_ER_constitutive_motifs.homer \
@@ -405,6 +422,7 @@ motifs: motifs/runx1_motifs.homer \
        motifs/ChIP24_AT2_ER_shuffled_motifs.homer \
        motifs/ChIP24_AT2_ER.motif_hits.tsv \
        motifs/ChIP24_REH_ER_motifs.homer \
+			 motifs/ChIP24_REH_ER_topN_motifs.homer \
        motifs/ChIP24_REH_ER_runx1Motif_motifs.homer \
        motifs/ChIP24_REH_ER_norunx1Motif_motifs.homer \
        motifs/ChIP24_REH_ER_constitutive_motifs.homer \
@@ -414,6 +432,7 @@ motifs: motifs/runx1_motifs.homer \
        motifs/ChIP24_REH_ER_shuffled_motifs.homer \
        motifs/ChIP24_REH_ER.motif_hits.tsv \
        motifs/ChIP23_NALM6_ER_motifs.homer \
+			 motifs/ChIP23_NALM6_ER_topN_motifs.homer \
        motifs/ChIP23_NALM6_ER_runx1Motif_motifs.homer \
        motifs/ChIP23_NALM6_ER_norunx1Motif_motifs.homer \
        motifs/ChIP23_NALM6_ER_constitutive_motifs.homer \
@@ -423,12 +442,13 @@ motifs: motifs/runx1_motifs.homer \
        motifs/ChIP23_NALM6_ER_shuffled_motifs.homer \
        motifs/ChIP23_NALM6_ER.motif_hits.tsv \
        motifs/ChIP22_NALM6_RUNX1_motifs.homer \
+			 motifs/ChIP22_NALM6_RUNX1_topN_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_runx1Motif_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_norunx1Motif_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_shuffled_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1.motif_hits.tsv \
        motifs/ChIP23_NALM6_RHD_motifs.homer
-	
+
 motifs/%_motifs.homer: homer/%_peaks.ucsc.bed
 	mkdir -p motifs/$*
 	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -size 200 -mask -p 15 -fdr 100 -dumpFasta > $@.part
@@ -438,7 +458,7 @@ motifs/%.motif_hits.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif
 	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$*.tmp -find motifs/all_motifs.motif > $@.part
 	rm -rf motifs/$*.tmp
 	mv $@.part $@
-	
+
 wgEncodeDacMapabilityConsensusExcludable.bed:
 	wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDacMapabilityConsensusExcludable.bed.gz
 	gunzip $@.gz
@@ -473,7 +493,7 @@ gsea/%_proteincoding_runxmotif.rnk: homer/%_peaks.annotated.tsv
 	mkdir -p gsea
 	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$16 != "" && $$19 == "protein-coding" && $$22 != "" {print $$16,$$6}' $< | sort -u -k1,1 | sort -k2,2nr > $@.part
 	mv $@.part $@
-	
+
 gsea/%.gsea: gsea/%.rnk
 	java -cp /data_synology/software/gsea-2.0.13/gsea2-2.0.13.jar -Xmx3048m xtools.gsea.GseaPreranked \
 		-rpt_label $* \
