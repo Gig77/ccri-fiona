@@ -9,10 +9,9 @@ option_list <- list(
 )
 opt <- parse_args(OptionParser(option_list=option_list))
 
-#opt <- data.frame('homer-peak-file'= "/mnt/projects/fiona/results/homer/runx1_peaks.annotated.tsv", 'summit-file'= "/mnt/projects/fiona/results/macs/runx1_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/runx1_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
-#opt <- data.frame('homer-peak-file'= "/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv", 'summit-file'= "/mnt/projects/fiona/results/macs/ChIP22_NALM6_RUNX1_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
-#opt <- data.frame('homer-peak-file'= "/mnt/projects/fiona/results/homer/diffbind_ER_vs_RUNX_peaks.annotated.tsv", 'macs-peak-file'= "/mnt/projects/fiona/results/macs/diffbind_ER_vs_RUNX_peaks.bed", 'summit-file'= "/mnt/projects/fiona/results/macs/diffbind_ER_vs_RUNX_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/diffbind_ER_vs_RUNX_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
+#opt <- data.frame('homer-peak-file'= "/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_better_peaks.annotated.tsv", 'macs-peak-file' = "/mnt/projects/fiona/results/macs/ChIP24_AT2_ER_better_peaks.bed", 'summit-file'= "/mnt/projects/fiona/results/macs/ChIP24_AT2_ER_better_summits.bed", 'out-file'= "/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_better_peaks.annotated.with-expr.tsv", stringsAsFactors=F, check.names=F)
 stopifnot(!is.null(opt$'homer-peak-file'))
+stopifnot(!is.null(opt$'macs-peak-file'))
 stopifnot(!is.null(opt$'out-file'))
 stopifnot(!is.null(opt$'summit-file'))
 
