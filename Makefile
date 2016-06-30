@@ -412,7 +412,7 @@ motifs: motifs/runx1_motifs.homer \
        motifs/er_motifs.homer \
        motifs/rhd_motifs.homer \
        motifs/ChIP24_AT2_ER_motifs.homer \
-			 motifs/ChIP24_AT2_ER_topN_motifs.homer \
+ 	   motifs/ChIP24_AT2_ER_topN_motifs.homer \
        motifs/ChIP24_AT2_ER_runx1Motif_motifs.homer \
        motifs/ChIP24_AT2_ER_norunx1Motif_motifs.homer \
        motifs/ChIP24_AT2_ER_constitutive_motifs.homer \
@@ -421,8 +421,9 @@ motifs: motifs/runx1_motifs.homer \
        motifs/ChIP24_AT2_ER_worse_motifs.homer \
        motifs/ChIP24_AT2_ER_shuffled_motifs.homer \
        motifs/ChIP24_AT2_ER.motif_hits.tsv \
+       motifs/ChIP24_AT2_ER_topN.motif_hits.tsv \
        motifs/ChIP24_REH_ER_motifs.homer \
-			 motifs/ChIP24_REH_ER_topN_motifs.homer \
+	   motifs/ChIP24_REH_ER_topN_motifs.homer \
        motifs/ChIP24_REH_ER_runx1Motif_motifs.homer \
        motifs/ChIP24_REH_ER_norunx1Motif_motifs.homer \
        motifs/ChIP24_REH_ER_constitutive_motifs.homer \
@@ -431,8 +432,9 @@ motifs: motifs/runx1_motifs.homer \
        motifs/ChIP24_REH_ER_worse_motifs.homer \
        motifs/ChIP24_REH_ER_shuffled_motifs.homer \
        motifs/ChIP24_REH_ER.motif_hits.tsv \
+       motifs/ChIP24_REH_ER_topN.motif_hits.tsv \
        motifs/ChIP23_NALM6_ER_motifs.homer \
-			 motifs/ChIP23_NALM6_ER_topN_motifs.homer \
+	   motifs/ChIP23_NALM6_ER_topN_motifs.homer \
        motifs/ChIP23_NALM6_ER_runx1Motif_motifs.homer \
        motifs/ChIP23_NALM6_ER_norunx1Motif_motifs.homer \
        motifs/ChIP23_NALM6_ER_constitutive_motifs.homer \
@@ -441,12 +443,14 @@ motifs: motifs/runx1_motifs.homer \
        motifs/ChIP23_NALM6_ER_worse_motifs.homer \
        motifs/ChIP23_NALM6_ER_shuffled_motifs.homer \
        motifs/ChIP23_NALM6_ER.motif_hits.tsv \
+       motifs/ChIP23_NALM6_ER_topN.motif_hits.tsv \
        motifs/ChIP22_NALM6_RUNX1_motifs.homer \
-			 motifs/ChIP22_NALM6_RUNX1_topN_motifs.homer \
+	   motifs/ChIP22_NALM6_RUNX1_topN_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_runx1Motif_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_norunx1Motif_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_shuffled_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1.motif_hits.tsv \
+       motifs/ChIP22_NALM6_RUNX1_topN.motif_hits.tsv \
        motifs/ChIP23_NALM6_RHD_motifs.homer
 
 motifs/%_motifs.homer: homer/%_peaks.ucsc.bed
