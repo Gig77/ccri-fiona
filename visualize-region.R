@@ -26,6 +26,7 @@ regions = rbind(regions, setNames(data.frame("VEGFA", "chr6", 43727798, 43770804
 regions = rbind(regions, setNames(data.frame("CDKN1A", "chr6", 36639099, 36659153, "meta", stringsAsFactors = F), names(regions)))
 regions = rbind(regions, setNames(data.frame("GZMB", "chr14", 25095203, 25108164, "meta", stringsAsFactors = F), names(regions)))
 regions = rbind(regions, setNames(data.frame("DNMT3a", "chr2", 25438556, 25592146, "meta", stringsAsFactors = F), names(regions)))
+regions = rbind(regions, setNames(data.frame("ETV6", "chr12", 11750000, 12100000, "meta", stringsAsFactors = F), names(regions)))
 
 # E/R "unique" peaks
 
@@ -53,8 +54,8 @@ for (i in 1:nrow(regions)) {
   gene.track <- BiomartGeneRegionTrack(genome = "hg19", chromosome = gsub("chr", "", chr), start = start, end = end, 
                                        name = "", showId=TRUE, stacking="squish", collapseTranscripts = collapseTranscripts,
                                        fontsize=16, fontcolor.group="black", background.title="white")
-#  seqlevels(ranges(gene.track)) <- sprintf("chr%s", seqlevels(ranges(gene.track)))
-#  chromosome(gene.track)=chr
+  seqlevels(ranges(gene.track)) <- sprintf("chr%s", seqlevels(ranges(gene.track)))
+  chromosome(gene.track)=chr
   
   chromosome(at2.er.chip) <- chr ; at2.er.chip.region <- subset(at2.er.chip, start, end)
   chromosome(at2.er.input) <- chr ; at2.er.input.region <- subset(at2.er.input, start, end)
