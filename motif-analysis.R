@@ -1,4 +1,3 @@
-library(Vennerable)
 
 minscore <- 2
 minoverlap <- 100
@@ -20,17 +19,33 @@ at2.worse <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_worse_p
 at2.worse <- at2.worse[!grepl("^GL", at2.worse$Chr),]
 at2.worse <- at2.worse[at2.worse$`Peak Score` >= minscore & at2.worse$End-at2.worse$Start <= maxwidth & at2.worse$`Distance to TSS` >= -max.dist.us & at2.worse$`Distance to TSS` <= max.dist.ds,]
 
+at2.shuffled <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_shuffled_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
+at2.shuffled <- at2.shuffled[!grepl("^GL", at2.shuffled$Chr),]
+at2.shuffled <- at2.shuffled[at2.shuffled$`Peak Score` >= minscore & at2.shuffled$End-at2.shuffled$Start <= maxwidth & at2.shuffled$`Distance to TSS` >= -max.dist.us & at2.shuffled$`Distance to TSS` <= max.dist.ds,]
+
 reh <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 reh <- reh[!grepl("^GL", reh$Chr),]
 reh <- reh[reh$`Peak Score` >= minscore & reh$End-reh$Start <= maxwidth & reh$`Distance to TSS` >= -max.dist.us & reh$`Distance to TSS` <= max.dist.ds,]
+
+reh.shuffled <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_shuffled_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
+reh.shuffled <- reh.shuffled[!grepl("^GL", reh.shuffled$Chr),]
+reh.shuffled <- reh.shuffled[reh.shuffled$`Peak Score` >= minscore & reh.shuffled$End-reh.shuffled$Start <= maxwidth & reh.shuffled$`Distance to TSS` >= -max.dist.us & reh.shuffled$`Distance to TSS` <= max.dist.ds,]
 
 nalm6.er <- read.delim("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 nalm6.er <- nalm6.er[!grepl("^GL", nalm6.er$Chr),]
 nalm6.er <- nalm6.er[nalm6.er$`Peak Score` >= minscore & nalm6.er$End-nalm6.er$Start <= maxwidth & nalm6.er$`Distance to TSS` >= -max.dist.us & nalm6.er$`Distance to TSS` <= max.dist.ds,]
 
+nalm6.er.shuffled <- read.delim("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_shuffled_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
+nalm6.er.shuffled <- nalm6.er.shuffled[!grepl("^GL", nalm6.er.shuffled$Chr),]
+nalm6.er.shuffled <- nalm6.er.shuffled[nalm6.er.shuffled$`Peak Score` >= minscore & nalm6.er.shuffled$End-nalm6.er.shuffled$Start <= maxwidth & nalm6.er.shuffled$`Distance to TSS` >= -max.dist.us & nalm6.er.shuffled$`Distance to TSS` <= max.dist.ds,]
+
 nalm6.runx1 <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 nalm6.runx1 <- nalm6.runx1[!grepl("^GL", nalm6.runx1$Chr),]
 nalm6.runx1 <- nalm6.runx1[nalm6.runx1$`Peak Score` >= minscore & nalm6.runx1$End-nalm6.runx1$Start <= maxwidth & nalm6.runx1$`Distance to TSS` >= -max.dist.us & nalm6.runx1$`Distance to TSS` <= max.dist.ds,]
+
+nalm6.runx1.shuffled <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_shuffled_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
+nalm6.runx1.shuffled <- nalm6.runx1.shuffled[!grepl("^GL", nalm6.runx1.shuffled$Chr),]
+nalm6.runx1.shuffled <- nalm6.runx1.shuffled[nalm6.runx1.shuffled$`Peak Score` >= minscore & nalm6.runx1.shuffled$End-nalm6.runx1.shuffled$Start <= maxwidth & nalm6.runx1.shuffled$`Distance to TSS` >= -max.dist.us & nalm6.runx1.shuffled$`Distance to TSS` <= max.dist.ds,]
 
 # peak overlaps
 
@@ -52,31 +67,49 @@ d <- data.frame("CL" = character(0), "Motif" = character(0), "Pct" = numeric(0),
 d <- rbind(d, setNames(data.frame("AT2 E/R", "RUNX1", sum(!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(at2)), names(d)))
 d <- rbind(d, setNames(data.frame("AT2 E/R", "ETS", sum(!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(at2)), names(d)))
 d <- rbind(d, setNames(data.frame("AT2 E/R", "EBF", sum(!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(at2)), names(d)))
-d <- rbind(d, setNames(data.frame("AT2 E/R", "ETS:RUNX", sum(!is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(at2)), names(d)))
 d <- rbind(d, setNames(data.frame("REH E/R", "RUNX1", sum(!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(reh)), names(d)))
 d <- rbind(d, setNames(data.frame("REH E/R", "ETS", sum(!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(reh)), names(d)))
 d <- rbind(d, setNames(data.frame("REH E/R", "EBF", sum(!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(reh)), names(d)))
-d <- rbind(d, setNames(data.frame("REH E/R", "ETS:RUNX", sum(!is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(reh)), names(d)))
 d <- rbind(d, setNames(data.frame("NALM6 RUNX1", "RUNX1", sum(!is.na(nalm6.runx1$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(nalm6.runx1)), names(d)))
 d <- rbind(d, setNames(data.frame("NALM6 RUNX1", "ETS", sum(!is.na(nalm6.runx1$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(nalm6.runx1)), names(d)))
 d <- rbind(d, setNames(data.frame("NALM6 RUNX1", "EBF", sum(!is.na(nalm6.runx1$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(nalm6.runx1)), names(d)))
-d <- rbind(d, setNames(data.frame("NALM6 RUNX1", "ETS:RUNX", sum(!is.na(nalm6.runx1$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(nalm6.runx1)), names(d)))
 d <- rbind(d, setNames(data.frame("NALM6 E/R", "RUNX1", sum(!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(nalm6.er)), names(d)))
 d <- rbind(d, setNames(data.frame("NALM6 E/R", "ETS", sum(!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(nalm6.er)), names(d)))
 d <- rbind(d, setNames(data.frame("NALM6 E/R", "EBF", sum(!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(nalm6.er)), names(d)))
-d <- rbind(d, setNames(data.frame("NALM6 E/R", "ETS:RUNX", sum(!is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(nalm6.er)), names(d)))
+d$CL <- factor(d$CL, levels=c("AT2 E/R", "REH E/R", "NALM6 E/R", "NALM6 RUNX1"))
+d$Motif <- factor(d$Motif, levels=c("RUNX1", "ETS", "EBF"))
 
+d.shuffled <- data.frame("CL" = character(0), "Motif" = character(0), "Pct" = numeric(0), stringsAsFactors = F)
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("AT2 E/R", "RUNX1", sum(!is.na(at2.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(at2.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("AT2 E/R", "ETS", sum(!is.na(at2.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(at2.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("AT2 E/R", "EBF", sum(!is.na(at2.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(at2.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("REH E/R", "RUNX1", sum(!is.na(reh.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(reh.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("REH E/R", "ETS", sum(!is.na(reh.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(reh.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("REH E/R", "EBF", sum(!is.na(reh.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(reh.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM6 RUNX1", "RUNX1", sum(!is.na(nalm6.runx1.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(nalm6.runx1.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM6 RUNX1", "ETS", sum(!is.na(nalm6.runx1.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(nalm6.runx1.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM6 RUNX1", "EBF", sum(!is.na(nalm6.runx1.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(nalm6.runx1.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM6 E/R", "RUNX1", sum(!is.na(nalm6.er.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / nrow(nalm6.er.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM6 E/R", "ETS", sum(!is.na(nalm6.er.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / nrow(nalm6.er.shuffled)), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM6 E/R", "EBF", sum(!is.na(nalm6.er.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / nrow(nalm6.er.shuffled)), names(d.shuffled)))
+d.shuffled$CL <- factor(d.shuffled$CL, levels=c("AT2 E/R", "REH E/R", "NALM6 E/R", "NALM6 RUNX1"))
+d.shuffled$Motif <- factor(d.shuffled$Motif, levels=c("RUNX1", "ETS", "EBF"))
+
+#pdf("/mnt/projects/fiona/results/temp.pdf", paper="a4")
 ggplot(data = d, aes(x = CL, y = Pct, fill = Motif)) +   
   geom_bar(position = position_dodge(), stat = "identity") +
+#  geom_bar(data = d.shuffled, aes(group=Motif), fill="black", alpha=0.2, position=position_dodge(), stat = "identity") +
+  geom_text(data = d.shuffled, label="---", color = "white", alpha = 0.5, size=5, position=position_dodge(width=0.9), stat = "identity") +
   labs(fill="Motif", x="Cell line", y="% of peaks with motif") + 
   ggtitle("Percentage of peaks with known motif") +
   theme_bw() +
-  scale_fill_manual(values = c("red", "darkgray", "orange", "black")) +
+  scale_fill_manual(values = c("red", "darkgray", "blue")) +
   scale_y_continuous(breaks = seq(0, 1, 0.1)) +
   theme(axis.text.x = element_text(size=10), 
         axis.text.y = element_text(size=10), 
         axis.title.x = element_text(size=15, vjust=-0.9),
         axis.title.y = element_text(size=15, vjust=1.9))
+#dev.off()
 
 # number of motifs per peak
 
@@ -93,14 +126,38 @@ d <- rbind(d, setNames(data.frame("AT2", "EBF", melt(prop.table(table(at2$`EBF(E
 d <- rbind(d, setNames(data.frame("REH", "EBF", melt(prop.table(table(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)))), names(d)))
 d <- rbind(d, setNames(data.frame("NALM-6 ER", "EBF", melt(prop.table(table(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)))), names(d)))
 d <- rbind(d, setNames(data.frame("NALM-6 RUNX1", "EBF", melt(prop.table(table(nalm6.runx1$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", melt(prop.table(table(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", melt(prop.table(table(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6 ER", "ETS:RUNX", melt(prop.table(table(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6 RUNX1", "ETS:RUNX", melt(prop.table(table(nalm6.runx1$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
+#d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", melt(prop.table(table(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
+#d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", melt(prop.table(table(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
+#d <- rbind(d, setNames(data.frame("NALM-6 ER", "ETS:RUNX", melt(prop.table(table(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
+#d <- rbind(d, setNames(data.frame("NALM-6 RUNX1", "ETS:RUNX", melt(prop.table(table(nalm6.runx1$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d)))
 d <- d[d$CountMotifs <= 5,]
 d$CountMotifs <- as.factor(d$CountMotifs)
+d$CL <- factor(d$CL, levels=c("AT2", "REH", "NALM-6 ER", "NALM-6 RUNX1"))
+d$Motif <- factor(d$Motif, levels=c("RUNX1", "ETS", "EBF"))
 
-#pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
+d.shuffled <- data.frame("CL" = character(0), "Motif" = character(0), "CountMotifs" = character(0), "CountPeaks" = numeric(0), stringsAsFactors = F)
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("AT2", "RUNX1", melt(prop.table(table(at2.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("REH", "RUNX1", melt(prop.table(table(reh.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 ER", "RUNX1", melt(prop.table(table(nalm6.er.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 RUNX1", "RUNX1", melt(prop.table(table(nalm6.runx1.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("AT2", "ETS", melt(prop.table(table(at2.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("REH", "ETS", melt(prop.table(table(reh.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 ER", "ETS", melt(prop.table(table(nalm6.er.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 RUNX1", "ETS", melt(prop.table(table(nalm6.runx1.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("AT2", "EBF", melt(prop.table(table(at2.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("REH", "EBF", melt(prop.table(table(reh.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 ER", "EBF", melt(prop.table(table(nalm6.er.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 RUNX1", "EBF", melt(prop.table(table(nalm6.runx1.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)))), names(d.shuffled)))
+#d.shuffled <- rbind(d.shuffled, setNames(data.frame("AT2", "ETS:RUNX", melt(prop.table(table(at2.shuffled$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+#d.shuffled <- rbind(d.shuffled, setNames(data.frame("REH", "ETS:RUNX", melt(prop.table(table(reh.shuffled$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+#d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 ER", "ETS:RUNX", melt(prop.table(table(nalm6.er.shuffled$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+#d.shuffled <- rbind(d.shuffled, setNames(data.frame("NALM-6 RUNX1", "ETS:RUNX", melt(prop.table(table(nalm6.runx1.shuffled$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)))), names(d.shuffled)))
+d.shuffled <- d.shuffled[d.shuffled$CountMotifs <= 5,]
+d.shuffled$CountMotifs <- as.factor(d.shuffled$CountMotifs)
+d.shuffled$CL <- factor(d.shuffled$CL, levels=c("AT2", "REH", "NALM-6 ER", "NALM-6 RUNX1"))
+d.shuffled$Motif <- factor(d.shuffled$Motif, levels=c("RUNX1", "ETS", "EBF"))
+
+#pdf("/mnt/projects/fiona/results/temp.pdf", paper="a4")
 ggplot(data = d, aes(x = CountMotifs, y = CountPeaks, fill = CL)) +
   geom_bar(position = position_dodge(), stat = "identity", width=0.7) +
   facet_wrap(~Motif, ncol=2) +
@@ -114,6 +171,21 @@ ggplot(data = d, aes(x = CountMotifs, y = CountPeaks, fill = CL)) +
         axis.text.y = element_text(size=10), 
         axis.title.x = element_text(size=15, vjust=-0.9),
         axis.title.y = element_text(size=15, vjust=1.9))
+
+ggplot(data = d.shuffled, aes(x = CountMotifs, y = CountPeaks, fill = CL)) +
+  geom_bar(position = position_dodge(), stat = "identity", width=0.7) +
+  facet_wrap(~Motif, ncol=3) +
+  coord_fixed(ratio=6) +
+  labs(fill="Cell line", x="No. of motifs per peak", y="% peaks") + 
+  ggtitle("No. of motifs in random (shuffled) peaks") +
+  theme_bw() +
+  scale_y_continuous(breaks = seq(0, 1, 0.1)) +
+  scale_fill_manual(values = c("red", "darkgray", "blue", "orange")) +
+  theme(axis.text.x = element_text(size=10), 
+        axis.text.y = element_text(size=10), 
+        axis.title.x = element_text(size=15, vjust=-0.9),
+        axis.title.y = element_text(size=15, vjust=1.9))
+
 #dev.off()
 
 # motif distance to summit
@@ -302,11 +374,23 @@ ggplot(data = d, aes(x = CL, y = Pct, fill = Class)) +
 
 # motif overlap AT2
 
+library(Vennerable)
+
+idcol <- which(grepl("PeakID", names(at2)))
 peak.sets.at2 <- list(
-  "RUNX1" = at2[,2][!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
-  "ETS" = at2[,2][!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
-  "EBF" = at2[,2][!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+  "RUNX1" = at2[,idcol][!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = at2[,idcol][!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = at2[,idcol][!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
 )
+
+idcol <- which(grepl("PeakID", names(at2.shuffled)))
+peak.sets.at2.shuffled <- list(
+  "RUNX1" = at2.shuffled[,idcol][!is.na(at2.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = at2.shuffled[,idcol][!is.na(at2.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = at2.shuffled[,idcol][!is.na(at2.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+)
+
+#pdf("/mnt/projects/fiona/results/temp.pdf", paper="a4")
 
 venn <- compute.Venn(Venn(peak.sets.at2), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
@@ -314,13 +398,31 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("AT2 Motif Overlap", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+venn <- compute.Venn(Venn(peak.sets.at2.shuffled), doWeights = TRUE, type = "circles")
+gp <- VennThemes(venn, colourAlgorithm = "signature")
+grid.newpage()
+plot(venn, gpList = gp)
+grid.text("AT2 Motif Overlap (shuffled peaks)", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+#dev.off()
+
 # motif overlap REH
 
+idcol <- which(grepl("PeakID", names(reh)))
 peak.sets.reh <- list(
-  "RUNX1" = reh[,2][!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
-  "ETS" = reh[,2][!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
-  "EBF" = reh[,2][!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+  "RUNX1" = reh[,idcol][!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = reh[,idcol][!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = reh[,idcol][!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
 )
+
+idcol <- which(grepl("PeakID", names(reh.shuffled)))
+peak.sets.reh.shuffled <- list(
+  "RUNX1" = reh.shuffled[,idcol][!is.na(reh.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = reh.shuffled[,idcol][!is.na(reh.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = reh.shuffled[,idcol][!is.na(reh.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+)
+
+#pdf("/mnt/projects/fiona/results/temp.pdf", paper="a4")
 
 venn <- compute.Venn(Venn(peak.sets.reh), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
@@ -328,13 +430,31 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("REH Motif Overlap", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+venn <- compute.Venn(Venn(peak.sets.reh.shuffled), doWeights = TRUE, type = "circles")
+gp <- VennThemes(venn, colourAlgorithm = "signature")
+grid.newpage()
+plot(venn, gpList = gp)
+grid.text("REH Motif Overlap (shuffled peaks)", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+#dev.off()
+
 # motif overlap NALM-6 RUNX1
 
+idcol <- which(grepl("PeakID", names(nalm6.runx1)))
 peak.sets.nalm6.runx1 <- list(
-  "RUNX1" = nalm6.runx1[,2][!is.na(nalm6.runx1$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
-  "ETS" = nalm6.runx1[,2][!is.na(nalm6.runx1$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
-  "EBF" = nalm6.runx1[,2][!is.na(nalm6.runx1$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+  "RUNX1" = nalm6.runx1[,idcol][!is.na(nalm6.runx1$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = nalm6.runx1[,idcol][!is.na(nalm6.runx1$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = nalm6.runx1[,idcol][!is.na(nalm6.runx1$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
 )
+
+idcol <- which(grepl("PeakID", names(nalm6.runx1.shuffled)))
+peak.sets.nalm6.runx1.shuffled <- list(
+  "RUNX1" = nalm6.runx1.shuffled[,idcol][!is.na(nalm6.runx1.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = nalm6.runx1.shuffled[,idcol][!is.na(nalm6.runx1.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = nalm6.runx1.shuffled[,idcol][!is.na(nalm6.runx1.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+)
+
+#pdf("/mnt/projects/fiona/results/temp.pdf", paper="a4")
 
 venn <- compute.Venn(Venn(peak.sets.nalm6.runx1), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
@@ -342,13 +462,31 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("NALM-6 RUNX1 Motif Overlap", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+venn <- compute.Venn(Venn(peak.sets.nalm6.runx1.shuffled), doWeights = TRUE, type = "circles")
+gp <- VennThemes(venn, colourAlgorithm = "signature")
+grid.newpage()
+plot(venn, gpList = gp)
+grid.text("NALM-6 RUNX1 Motif Overlap (shuffled peaks)", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+#dev.off()
+
 # motif overlap NALM-6 ER
 
+idcol <- which(grepl("PeakID", names(nalm6.er)))
 peak.sets.nalm6.er <- list(
-  "RUNX1" = nalm6.er[,2][!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
-  "ETS" = nalm6.er[,2][!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
-  "EBF" = nalm6.er[,2][!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+  "RUNX1" = nalm6.er[,idcol][!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = nalm6.er[,idcol][!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = nalm6.er[,idcol][!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
 )
+
+idcol <- which(grepl("PeakID", names(nalm6.er.shuffled)))
+peak.sets.nalm6.er.shuffled <- list(
+  "RUNX1" = nalm6.er.shuffled[,idcol][!is.na(nalm6.er.shuffled$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)],
+  "ETS" = nalm6.er.shuffled[,idcol][!is.na(nalm6.er.shuffled$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)],
+  "EBF" = nalm6.er.shuffled[,idcol][!is.na(nalm6.er.shuffled$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)]
+)
+
+#pdf("/mnt/projects/fiona/results/temp.pdf", paper="a4")
 
 venn <- compute.Venn(Venn(peak.sets.nalm6.er), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
@@ -356,16 +494,28 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("NALM-6 ER Motif Overlap", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+venn <- compute.Venn(Venn(peak.sets.nalm6.er.shuffled), doWeights = TRUE, type = "circles")
+gp <- VennThemes(venn, colourAlgorithm = "signature")
+grid.newpage()
+plot(venn, gpList = gp)
+grid.text("NALM-6 ER Motif Overlap (shuffled peaks)", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+#dev.off()
+
 # motif composition constitutive RUNX1 vs. E/R de novo binding sites
 
 #pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
 
 # AT2
 
+idcol <- which(grepl("PeakID", names(at2)))
+
+print(sprintf("Number of constitutive peaks in AT2: %d", length(unique(o.at2.nalm6.runx1@queryHits))))
+
 peak.sets.at2.constitutive <- list(
-  "RUNX1" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),2],
-  "ETS" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),2],
-  "EBF" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),2]
+  "RUNX1" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
+  "ETS" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
+  "EBF" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
 venn <- compute.Venn(Venn(peak.sets.at2.constitutive), doWeights = TRUE, type = "circles")
@@ -374,10 +524,13 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("AT2 motif overlap constitutive E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+
+print(sprintf("Number of de novo peaks in AT2: %d", nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits))))
+
 peak.sets.at2.denovo <- list(
-  "RUNX1" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),2],
-  "ETS" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),2],
-  "EBF" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),2]
+  "RUNX1" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
+  "ETS" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
+  "EBF" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
 venn <- compute.Venn(Venn(peak.sets.at2.denovo), doWeights = TRUE, type = "circles")
@@ -388,10 +541,14 @@ grid.text("AT2 motif overlap de novo E/R peaks", vp = viewport(x = 0.5, y = 0.98
 
 # REH
 
+idcol <- which(grepl("PeakID", names(reh)))
+
+print(sprintf("Number of constitutive peaks in REH: %d", length(unique(o.reh.nalm6.runx1@queryHits))))
+
 peak.sets.reh.constitutive <- list(
-  "RUNX1" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),2],
-  "ETS" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),2],
-  "EBF" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),2]
+  "RUNX1" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
+  "ETS" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
+  "EBF" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
 venn <- compute.Venn(Venn(peak.sets.reh.constitutive), doWeights = TRUE, type = "circles")
@@ -400,10 +557,12 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("REH motif overlap constitutive E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+print(sprintf("Number of de novo peaks in REH: %d", nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits))))
+
 peak.sets.reh.denovo <- list(
-  "RUNX1" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),2],
-  "ETS" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),2],
-  "EBF" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),2]
+  "RUNX1" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
+  "ETS" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
+  "EBF" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
 venn <- compute.Venn(Venn(peak.sets.reh.denovo), doWeights = TRUE, type = "circles")
@@ -414,10 +573,14 @@ grid.text("REH motif overlap de novo E/R peaks", vp = viewport(x = 0.5, y = 0.98
 
 # NALM-6
 
+idcol <- which(grepl("PeakID", names(nalm6.er)))
+
+print(sprintf("Number of constitutive peaks in NALM-6 E/R: %d", length(unique(o.nalm6.er.runx1@queryHits))))
+
 peak.sets.nalm6.er.constitutive <- list(
-  "RUNX1" = nalm6.er[intersect(o.nalm6.er.runx1@queryHits, which(!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),2],
-  "ETS" = nalm6.er[intersect(o.nalm6.er.runx1@queryHits, which(!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),2],
-  "EBF" = nalm6.er[intersect(o.nalm6.er.runx1@queryHits, which(!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),2]
+  "RUNX1" = nalm6.er[intersect(o.nalm6.er.runx1@queryHits, which(!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
+  "ETS" = nalm6.er[intersect(o.nalm6.er.runx1@queryHits, which(!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
+  "EBF" = nalm6.er[intersect(o.nalm6.er.runx1@queryHits, which(!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
 venn <- compute.Venn(Venn(peak.sets.nalm6.er.constitutive), doWeights = TRUE, type = "circles")
@@ -426,10 +589,12 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text("NALM-6 motif overlap constitutive E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+print(sprintf("Number of de novo peaks in NALM-6 E/R: %d", nrow(nalm6.er)-length(unique(o.nalm6.er.runx1@queryHits))))
+
 peak.sets.nalm6.er.denovo <- list(
-  "RUNX1" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.er.runx1@queryHits], which(!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),2],
-  "ETS" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.er.runx1@queryHits], which(!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),2],
-  "EBF" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.er.runx1@queryHits], which(!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),2]
+  "RUNX1" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.er.runx1@queryHits], which(!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
+  "ETS" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.er.runx1@queryHits], which(!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
+  "EBF" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.er.runx1@queryHits], which(!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
 venn <- compute.Venn(Venn(peak.sets.nalm6.er.denovo), doWeights = TRUE, type = "circles")
@@ -800,7 +965,7 @@ d$category[d$numRUNXSummit == 0 & d$numETSSummit > 0 & d$numEBFSummit > 0] <- "E
 d$category[d$numRUNXSummit > 0 & d$numETSSummit > 0 & d$numEBFSummit > 0] <- "All three"
 d$category <- factor(d$category, levels=c("All three", "RUNX and ETS", "RUNX and EBF", "only RUNX", "ETS and EBF", "only ETS", "only EBF", "None"))
 
-pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
+#pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
 
 ggplot(data = d, aes(x = category, y = log(Score, 2))) +
   geom_violin(fill="#FFCDFF") +
@@ -881,8 +1046,7 @@ ggplot(data = d, aes(x = factor(numEBFSummit), y = log(Score, 2))) +
         axis.title.y = element_text(size=15, vjust=1.9)) +
   coord_fixed(ratio=0.5)
 
-dev.off()
+#dev.off()
 
 # distance between co-occuring motifs
 
-dist.at2 <- at2$
