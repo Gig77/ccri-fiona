@@ -2,43 +2,7 @@ library(GenomicRanges)
 library(Vennerable)
 library(gridExtra)
 
-minscore <- 2
-minoverlap <- 100
-
-at2 <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
-at2 <- at2[!grepl("^GL", at2$Chr),]
-at2 <- at2[at2$`Peak Score` >= minscore,]
-at2.gr <- GRanges(seqnames = at2$Chr, ranges=IRanges(at2$Start, at2$End), mcols=data.frame(score=at2$`Peak Score`))
-
-at2.shuffled <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_shuffled_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
-at2.shuffled <- at2.shuffled[!grepl("^GL", at2.shuffled$Chr),]
-at2.shuffled <- at2.shuffled[at2.shuffled$`Peak Score` >= minscore,]
-
-reh <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
-reh <- reh[!grepl("^GL", reh$Chr),]
-reh <- reh[reh$`Peak Score` >= minscore,]
-reh.gr <- GRanges(seqnames = reh$Chr, ranges=IRanges(reh$Start, reh$End), mcols=data.frame(score=reh$`Peak Score`))
-
-nalm6.runx1 <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
-nalm6.runx1 <- nalm6.runx1[!grepl("^GL", nalm6.runx1$Chr),]
-nalm6.runx1 <- nalm6.runx1[nalm6.runx1$`Peak Score` >= minscore,]
-nalm6.runx1.gr <- GRanges(seqnames = nalm6.runx1$Chr, ranges=IRanges(nalm6.runx1$Start, nalm6.runx1$End), mcols=data.frame(score=nalm6.runx1$`Peak Score`))
-
-nalm6.er <- read.delim("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
-nalm6.er <- nalm6.er[!grepl("^GL", nalm6.er$Chr),]
-nalm6.er <- nalm6.er[nalm6.er$`Peak Score` >= minscore,]
-nalm6.er.gr <- GRanges(seqnames = nalm6.er$Chr, ranges=IRanges(nalm6.er$Start, nalm6.er$End), mcols=data.frame(score=nalm6.er$`Peak Score`))
-
-nalm6.shuffled <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_shuffled_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
-nalm6.shuffled <- nalm6.shuffled[!grepl("^GL", nalm6.shuffled$Chr),]
-nalm6.shuffled <- nalm6.shuffled[nalm6.shuffled$`Peak Score` >= minscore,]
-
-# find overlaps
-
-o.at2.reh <- findOverlaps(at2.gr, reh.gr, minoverlap=minoverlap)
-o.nalm6.runx1.er <- findOverlaps(nalm6.runx1.gr, nalm6.er.gr, minoverlap=minoverlap)
-o.nalm6er.at2 <- findOverlaps(nalm6.er.gr, at2.gr, minoverlap=minoverlap)
-o.nalm6er.reh <- findOverlaps(nalm6.er.gr, reh.gr, minoverlap=minoverlap)
+source("/mnt/projects/fiona/scripts/read-peaks.R")
 
 pdf("/mnt/projects/fiona/results/peak-overlaps.pdf", height=10)
 
@@ -202,60 +166,6 @@ ggplot(data=o.df.best, aes(log(runx1.score), log(er.score))) +
 #spear <- cor.test(log(o.df.best$er.score), log(o.df.best$runx1.score), method="spearman")
 #text(2, 800, sprintf("Spearman correlation = %.2f", spear$estimate), adj=0)
 
-
-# distance to TSS
-
-plot(density(at2$`Distance to TSS`/1000), xlim=c(-50,50), col="blue", lwd=2, xlab="Distance to nearest TSS in kb", main="Peak distance to nearest TSS")
-polygon(density(reh$`Distance to TSS`/1000), xlim=c(-100,100), col="#FF000050", lwd=2)
-lines(density(at2.shuffled$`Distance to TSS`/1000), xlim=c(-100,100), col="blue", lwd=2, lty=2)
-legend("topright", c("AT2", "REH"), fill=c("blue", "red", "black"))
-
-hist(at2$`Distance to TSS`/1000, xlim=c(-50,50), breaks=1000, freq = F)
-hist(at2.shuffled$`Distance to TSS`/1000, xlim=c(-50,50), breaks=2000, freq = F, add=T)
-lines(density(at2$`Distance to TSS`/1000), xlim=c(-50,50), col="red", lwd=2)
-
-plot(density(at2$`Distance to TSS`[unique(o.at2.reh@queryHits)]/1000), xlim=c(-100,100), col="blue", lwd=3, xlab="Distance to nearest TSS in kb", main="AT2 peak distance to nearest TSS")
-lines(density(at2$`Distance to TSS`[-unique(o.at2.reh@queryHits)]/1000), xlim=c(-100,100), col="red", lwd=3)
-legend("topright", c("shared with REH", "only AT2"), fill=c("blue", "red"))
-
-plot(density(reh$`Distance to TSS`[unique(o.at2.reh@subjectHits)]/1000), xlim=c(-100,100), col="blue", lwd=3, xlab="Distance to nearest TSS in kb", main="REH peak distance to nearest TSS")
-lines(density(reh$`Distance to TSS`[-unique(o.at2.reh@subjectHits)]/1000), xlim=c(-100,100), col="red", lwd=3)
-legend("topright", c("shared with AT2", "only REH"), fill=c("blue", "red"))
-
-plot(density(at2$`Distance to TSS`[at2$`Peak Score`<=30]/1000), xlim=c(-100,100), col="blue", lwd=3, xlab="Distance to nearest TSS in kb", main="AT2 peak distance to nearest TSS")
-lines(density(at2$`Distance to TSS`[at2$`Peak Score`>30]/1000), xlim=c(-100,100), col="red", lwd=3)
-legend("topright", c("Peak score <= 30", "Peak score > 30"), fill=c("blue", "red"))
-
-plot(density(reh$`Distance to TSS`[reh$`Peak Score`<=30]/1000), xlim=c(-100,100), col="blue", lwd=3, xlab="Distance to nearest TSS in kb", main="REH peak distance to nearest TSS")
-lines(density(reh$`Distance to TSS`[reh$`Peak Score`>30]/1000), xlim=c(-100,100), col="red", lwd=3)
-legend("topright", c("Peak score <= 30", "Peak score > 30"), fill=c("blue", "red"))
-
-#pdf("/mnt/projects/fiona/results/test.pdf")
-plot(NA, xlim=c(-50,50), ylim=c(0,0.05), xlab="Distance to nearest TSS (kb)", main="NALM6 peak distance to nearest TSS", ylab="Density", cex.lab=1.5, cex.axis=1.3)
-#hist(nalm6.er$`Distance to TSS`/1000, xlim=c(-50,50), breaks=1000, freq = F, col="#0000FF50", add=T)
-#hist(nalm6.runx1$`Distance to TSS`/1000, xlim=c(-50,50), breaks=1000, freq = F, col="#FF000050", add=T)
-#hist(nalm6.shuffled$`Distance to TSS`/1000, xlim=c(-50,50), breaks=1000, freq = F, col="#00000030", add=T)
-polygon(density(nalm6.shuffled$`Distance to TSS`/1000, n=5000, bw=3), xlim=c(-50,50), col="lightgray", border="lightgray")
-lines(density(nalm6.er$`Distance to TSS`/1000, n=5000, bw=3), xlim=c(-50,50), col="blue", lwd=4)
-lines(density(nalm6.runx1$`Distance to TSS`/1000, n=5000, bw=3), xlim=c(-50,50), col="red", lwd=4)
-legend("topright", c("E/R", "RUNX1", "random"), fill=c("blue", "red", "lightgray"), cex=1.6)
-#dev.off()
-
-plot(density(nalm6.runx1$`Distance to TSS`[unique(o.nalm6.runx1.er@queryHits)]/1000), xlim=c(-100,100), col="blue", lwd=3, xlab="Distance to nearest TSS in kb", main="NALM6 RUNX1 peak distance to nearest TSS")
-lines(density(nalm6.runx1$`Distance to TSS`[-unique(o.nalm6.runx1.er@queryHits)]/1000), xlim=c(-100,100), col="red", lwd=3)
-legend("topright", c("shared with E/R", "only RUNX1"), fill=c("blue", "red"))
-
-plot(density(nalm6.er$`Distance to TSS`[unique(o.nalm6.runx1.er@subjectHits)]/1000), xlim=c(-100,100), col="blue", lwd=3, xlab="Distance to nearest TSS in kb", main="NALM6 E/R peak distance to nearest TSS")
-lines(density(nalm6.er$`Distance to TSS`[-unique(o.nalm6.runx1.er@subjectHits)]/1000), xlim=c(-100,100), col="red", lwd=3)
-legend("topright", c("shared with RUNX1", "only E/R"), fill=c("blue", "red"))
-
-plot(density(nalm6.runx1$`Distance to TSS`[nalm6.runx1$`Peak Score`>30]/1000), xlim=c(-100,100), col="red", lwd=3, xlab="Distance to nearest TSS in kb", main="NALM6 RUNX1 peak distance to nearest TSS")
-lines(density(nalm6.runx1$`Distance to TSS`[nalm6.runx1$`Peak Score`<=30]/1000), xlim=c(-100,100), col="blue", lwd=3)
-legend("topright", c("Peak score <= 30", "Peak score > 30"), fill=c("blue", "red"))
-
-plot(density(nalm6.er$`Distance to TSS`[nalm6.er$`Peak Score`>30]/1000), xlim=c(-100,100), col="red", lwd=3, xlab="Distance to nearest TSS in kb", main="NALM6 E/R peak distance to nearest TSS")
-lines(density(nalm6.er$`Distance to TSS`[nalm6.er$`Peak Score`<=30]/1000), xlim=c(-100,100), col="blue", lwd=3)
-legend("topright", c("Peak score <= 30", "Peak score > 30"), fill=c("blue", "red"))
 
 # promoter overlap
 
