@@ -11,6 +11,14 @@ at2 <- at2[!grepl("^GL", at2$Chr),]
 at2 <- with(at2, at2[`Peak Score` >= minscore & End-Start <= maxwidth & `Distance to TSS` >= -max.dist.us & `Distance to TSS` <= max.dist.ds,])
 at2.gr <- GRanges(seqnames = at2$Chr, ranges=IRanges(at2$Start, at2$End), mcols=data.frame(score=at2$`Peak Score`))
 
+at2.better <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_better_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
+at2.better <- at2.better[!grepl("^GL", at2.better$Chr),]
+at2.better <- with(at2.better, at2.better[`Peak Score` >= minscore & End-Start <= maxwidth & `Distance to TSS` >= -max.dist.us & `Distance to TSS` <= max.dist.ds,])
+
+at2.worse <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_worse_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
+at2.worse <- at2.worse[!grepl("^GL", at2.worse$Chr),]
+at2.worse <- with(at2.worse, at2.worse[`Peak Score` >= minscore & End-Start <= maxwidth & `Distance to TSS` >= -max.dist.us & `Distance to TSS` <= max.dist.ds,])
+
 at2.shuffled <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_shuffled_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 at2.shuffled <- at2.shuffled[!grepl("^GL", at2.shuffled$Chr),]
 at2.shuffled <- with(at2.shuffled, at2.shuffled[`Peak Score` >= minscore & End-Start <= maxwidth & `Distance to TSS` >= -max.dist.us & `Distance to TSS` <= max.dist.ds,])
@@ -48,3 +56,5 @@ o.at2.reh <- findOverlaps(at2.gr, reh.gr, minoverlap=minoverlap)
 o.nalm6.runx1.er <- findOverlaps(nalm6.runx1.gr, nalm6.er.gr, minoverlap=minoverlap)
 o.nalm6er.at2 <- findOverlaps(nalm6.er.gr, at2.gr, minoverlap=minoverlap)
 o.nalm6er.reh <- findOverlaps(nalm6.er.gr, reh.gr, minoverlap=minoverlap)
+o.at2.nalm6.runx1 <- findOverlaps(at2.gr, nalm6.runx1.gr, minoverlap=minoverlap)
+o.reh.nalm6.runx1 <- findOverlaps(reh.gr, nalm6.runx1.gr, minoverlap=minoverlap)
