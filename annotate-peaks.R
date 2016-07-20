@@ -74,7 +74,7 @@ for (cl in celllines) {
 }
 
 #-----------------------------------------------------------------
-# annotate constitutive peaks (i.e. overlapping with RUNX1 peak) vs. de novo peaks (i.e. not overlapping with RUNX1 peak)
+# annotate shared peaks (i.e. overlapping with RUNX1 peak) vs. unique peaks (i.e. not overlapping with RUNX1 peak)
 #-----------------------------------------------------------------
 
 peaks.gr <- GRanges(seqnames=peaks.ann$Chr, ranges=IRanges(start=peaks.ann$Start, end=peaks.ann$End))
@@ -82,9 +82,9 @@ nalm6.runx1 <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_
 nalm6.runx1.gr <- GRanges(seqnames = nalm6.runx1$Chr, ranges=IRanges(nalm6.runx1$Start, nalm6.runx1$End))
 o.nalm6.runx1 <- findOverlaps(peaks.gr, nalm6.runx1.gr, minoverlap=100, ignore.strand=TRUE)
 better_peak <- peaks.ann$`Peak Score`[o.nalm6.runx1@queryHits] > nalm6.runx1$`Peak Score`[o.nalm6.runx1@subjectHits]
-peaks.ann$runx1_overlap <- "de novo"
-peaks.ann$runx1_overlap[unique(o.nalm6.runx1@queryHits[better_peak])] <- "constitutive_better"
-peaks.ann$runx1_overlap[unique(o.nalm6.runx1@queryHits[!better_peak])] <- "constitutive_worse"
+peaks.ann$runx1_overlap <- "unique"
+peaks.ann$runx1_overlap[unique(o.nalm6.runx1@queryHits[better_peak])] <- "shared_better"
+peaks.ann$runx1_overlap[unique(o.nalm6.runx1@queryHits[!better_peak])] <- "shared_worse"
 
 #-----------------------------------------------------------------
 # annotate expression datasets

@@ -6,7 +6,7 @@ at2 <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_peaks.annotat
 reh <- read.delim("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 nalm6.runx1 <- read.delim("/mnt/projects/fiona/results/homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 nalm6.er <- read.delim("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
-er.denovo <- read.delim("/mnt/projects/fiona/results/er-consensus-peaks-not-runx1.xls", check.names = F)
+er.unique <- read.delim("/mnt/projects/fiona/results/er-consensus-peaks-not-runx1.xls", check.names = F)
 er.better <- read.delim("/mnt/projects/fiona/results/er-consensus-peaks-better-than-runx1.xls", check.names = F)
 er.diffbind <- read.delim("/mnt/projects/fiona/results/homer/ER.diffbind_peaks.annotated.with-expr.tsv", stringsAsFactors = F, check.names = F)
 
@@ -85,10 +85,10 @@ enrichAll <- function(gene.entrez=NULL, gene.hgnc=NULL, universe.entrez=NULL, un
   result[order(result$pvalue),]
 }
 
-# enrichment E/R de novo peaks
-enr.denovo <- enrichAll(
-  gene.entrez=as.character(unique(er.denovo$`Entrez ID`)),
-  gene.hgnc=unique(er.denovo$`Gene Name`),
+# enrichment E/R unique peaks
+enr.unique <- enrichAll(
+  gene.entrez=as.character(unique(er.unique$`Entrez ID`)),
+  gene.hgnc=unique(er.unique$`Gene Name`),
   universe.entrez=as.character(unique(c(at2$`Entrez ID`, reh$`Entrez ID`, nalm6.runx1$`Entrez ID`, nalm6.er$`Entrez ID`))),
   universe.hgnc=unique(c(at2$`Gene Name`, reh$`Gene Name`, nalm6.runx1$`Gene Name`, nalm6.er$`Gene Name`)),
   pvalueCutoff = 0.05,

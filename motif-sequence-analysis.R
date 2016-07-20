@@ -233,51 +233,51 @@ plot(m$x, m$y, cex=0.3, xlim=c(0, max(m$x, m$y)+0.003), ylim=c(0, max(m$x, m$y)+
 text(m$x, m$y-0.0007, m$Row.names, cex=0.6)
 abline(0, 1, lty=2)
 
-# AT2 E/R constitutive vs. de novo
+# AT2 E/R shared vs. unique
 
-at2.motifs.denovo <- at2.motifs[at2.motifs$PositionID %in% at2[at2$runx1_overlap == "de novo", 1],]
-at2.motifs.denovo <- at2.motifs.denovo[order(at2.motifs.denovo$PositionID, at2.motifs.denovo$`Motif Name`, at2.motifs.denovo$MotifScore, -abs(at2.motifs.denovo$Offset), decreasing = T),]
-at2.freq.denovo <- sort(prop.table(table(at2.motifs.denovo$Sequence.unstranded[at2.motifs.denovo$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
+at2.motifs.unique <- at2.motifs[at2.motifs$PositionID %in% at2[at2$runx1_overlap == "unique", 1],]
+at2.motifs.unique <- at2.motifs.unique[order(at2.motifs.unique$PositionID, at2.motifs.unique$`Motif Name`, at2.motifs.unique$MotifScore, -abs(at2.motifs.unique$Offset), decreasing = T),]
+at2.freq.unique <- sort(prop.table(table(at2.motifs.unique$Sequence.unstranded[at2.motifs.unique$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
 
-at2.motifs.constitutive <- at2.motifs[at2.motifs$PositionID %in% at2[at2$runx1_overlap %in% c("constitutive_better", "constitutive_worse"), 1],]
-at2.motifs.constitutive <- at2.motifs.constitutive[order(at2.motifs.constitutive$PositionID, at2.motifs.constitutive$`Motif Name`, at2.motifs.constitutive$MotifScore, -abs(at2.motifs.constitutive$Offset), decreasing = T),]
-at2.freq.constitutive <- sort(prop.table(table(at2.motifs.constitutive$Sequence.unstranded[at2.motifs.constitutive$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
+at2.motifs.shared <- at2.motifs[at2.motifs$PositionID %in% at2[at2$runx1_overlap %in% c("shared_better", "shared_worse"), 1],]
+at2.motifs.shared <- at2.motifs.shared[order(at2.motifs.shared$PositionID, at2.motifs.shared$`Motif Name`, at2.motifs.shared$MotifScore, -abs(at2.motifs.shared$Offset), decreasing = T),]
+at2.freq.shared <- sort(prop.table(table(at2.motifs.shared$Sequence.unstranded[at2.motifs.shared$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
 
-m <- merge(at2.freq.denovo, at2.freq.constitutive, by="row.names", all = T)
+m <- merge(at2.freq.unique, at2.freq.shared, by="row.names", all = T)
 m[is.na(m)] <- 0
-plot(m$x, m$y, cex=0.3, xlim=c(0, max(m$x, m$y)+0.003), ylim=c(0, max(m$x, m$y)+0.003), xlab = "kmer proportion AT2 E/R de novo", ylab = "kmer proportion AT2 E/R constitutive", main="RUNX Motif Frequency AT2 E/R de novo vs. constitutive")
+plot(m$x, m$y, cex=0.3, xlim=c(0, max(m$x, m$y)+0.003), ylim=c(0, max(m$x, m$y)+0.003), xlab = "kmer proportion AT2 E/R unique", ylab = "kmer proportion AT2 E/R shared", main="RUNX Motif Frequency AT2 E/R unique vs. shared")
 text(m$x, m$y-0.0007, m$Row.names, cex=0.6)
 abline(0, 1, lty=2)
 
-# REH E/R constitutive vs. de novo
+# REH E/R shared vs. unique
 
-reh.motifs.denovo <- reh.motifs[reh.motifs$PositionID %in% reh[reh$runx1_overlap == "de novo", 1],]
-reh.motifs.denovo <- reh.motifs.denovo[order(reh.motifs.denovo$PositionID, reh.motifs.denovo$`Motif Name`, reh.motifs.denovo$MotifScore, -abs(reh.motifs.denovo$Offset), decreasing = T),]
-reh.freq.denovo <- sort(prop.table(table(reh.motifs.denovo$Sequence.unstranded[reh.motifs.denovo$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
+reh.motifs.unique <- reh.motifs[reh.motifs$PositionID %in% reh[reh$runx1_overlap == "unique", 1],]
+reh.motifs.unique <- reh.motifs.unique[order(reh.motifs.unique$PositionID, reh.motifs.unique$`Motif Name`, reh.motifs.unique$MotifScore, -abs(reh.motifs.unique$Offset), decreasing = T),]
+reh.freq.unique <- sort(prop.table(table(reh.motifs.unique$Sequence.unstranded[reh.motifs.unique$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
 
-reh.motifs.constitutive <- reh.motifs[reh.motifs$PositionID %in% reh[reh$runx1_overlap %in% c("constitutive_better", "constitutive_worse"), 1],]
-reh.motifs.constitutive <- reh.motifs.constitutive[order(reh.motifs.constitutive$PositionID, reh.motifs.constitutive$`Motif Name`, reh.motifs.constitutive$MotifScore, -abs(reh.motifs.constitutive$Offset), decreasing = T),]
-reh.freq.constitutive <- sort(prop.table(table(reh.motifs.constitutive$Sequence.unstranded[reh.motifs.constitutive$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
+reh.motifs.shared <- reh.motifs[reh.motifs$PositionID %in% reh[reh$runx1_overlap %in% c("shared_better", "shared_worse"), 1],]
+reh.motifs.shared <- reh.motifs.shared[order(reh.motifs.shared$PositionID, reh.motifs.shared$`Motif Name`, reh.motifs.shared$MotifScore, -abs(reh.motifs.shared$Offset), decreasing = T),]
+reh.freq.shared <- sort(prop.table(table(reh.motifs.shared$Sequence.unstranded[reh.motifs.shared$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
 
-m <- merge(reh.freq.denovo, reh.freq.constitutive, by="row.names", all = T)
+m <- merge(reh.freq.unique, reh.freq.shared, by="row.names", all = T)
 m[is.na(m)] <- 0
-plot(m$x, m$y, cex=0.3, xlim=c(0, max(m$x, m$y)+0.003), ylim=c(0, max(m$x, m$y)+0.003), xlab = "kmer proportion REH E/R de novo", ylab = "kmer proportion REH E/R constitutive", main="RUNX Motif Frequency REH E/R de novo vs. constitutive")
+plot(m$x, m$y, cex=0.3, xlim=c(0, max(m$x, m$y)+0.003), ylim=c(0, max(m$x, m$y)+0.003), xlab = "kmer proportion REH E/R unique", ylab = "kmer proportion REH E/R shared", main="RUNX Motif Frequency REH E/R unique vs. shared")
 text(m$x, m$y-0.0007, m$Row.names, cex=0.6)
 abline(0, 1, lty=2)
 
-# NALM6 E/R constitutive vs. de novo
+# NALM6 E/R shared vs. unique
 
-nalm6.er.motifs.denovo <- nalm6.er.motifs[nalm6.er.motifs$PositionID %in% nalm6.er[nalm6.er$runx1_overlap == "de novo", 1],]
-nalm6.er.motifs.denovo <- nalm6.er.motifs.denovo[order(nalm6.er.motifs.denovo$PositionID, nalm6.er.motifs.denovo$`Motif Name`, nalm6.er.motifs.denovo$MotifScore, -abs(nalm6.er.motifs.denovo$Offset), decreasing = T),]
-nalm6.er.freq.denovo <- sort(prop.table(table(nalm6.er.motifs.denovo$Sequence.unstranded[nalm6.er.motifs.denovo$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
+nalm6.er.motifs.unique <- nalm6.er.motifs[nalm6.er.motifs$PositionID %in% nalm6.er[nalm6.er$runx1_overlap == "unique", 1],]
+nalm6.er.motifs.unique <- nalm6.er.motifs.unique[order(nalm6.er.motifs.unique$PositionID, nalm6.er.motifs.unique$`Motif Name`, nalm6.er.motifs.unique$MotifScore, -abs(nalm6.er.motifs.unique$Offset), decreasing = T),]
+nalm6.er.freq.unique <- sort(prop.table(table(nalm6.er.motifs.unique$Sequence.unstranded[nalm6.er.motifs.unique$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
 
-nalm6.er.motifs.constitutive <- nalm6.er.motifs[nalm6.er.motifs$PositionID %in% nalm6.er[nalm6.er$runx1_overlap %in% c("constitutive_better", "constitutive_worse"), 1],]
-nalm6.er.motifs.constitutive <- nalm6.er.motifs.constitutive[order(nalm6.er.motifs.constitutive$PositionID, nalm6.er.motifs.constitutive$`Motif Name`, nalm6.er.motifs.constitutive$MotifScore, -abs(nalm6.er.motifs.constitutive$Offset), decreasing = T),]
-nalm6.er.freq.constitutive <- sort(prop.table(table(nalm6.er.motifs.constitutive$Sequence.unstranded[nalm6.er.motifs.constitutive$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
+nalm6.er.motifs.shared <- nalm6.er.motifs[nalm6.er.motifs$PositionID %in% nalm6.er[nalm6.er$runx1_overlap %in% c("shared_better", "shared_worse"), 1],]
+nalm6.er.motifs.shared <- nalm6.er.motifs.shared[order(nalm6.er.motifs.shared$PositionID, nalm6.er.motifs.shared$`Motif Name`, nalm6.er.motifs.shared$MotifScore, -abs(nalm6.er.motifs.shared$Offset), decreasing = T),]
+nalm6.er.freq.shared <- sort(prop.table(table(nalm6.er.motifs.shared$Sequence.unstranded[nalm6.er.motifs.shared$`Motif Name`=="RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer"])), decreasing = T)
 
-m <- merge(nalm6.er.freq.denovo, nalm6.er.freq.constitutive, by="row.names", all = T)
+m <- merge(nalm6.er.freq.unique, nalm6.er.freq.shared, by="row.names", all = T)
 m[is.na(m)] <- 0
-plot(m$x, m$y, cex=0.3, xlim=c(0, max(m$x, m$y)+0.003), ylim=c(0, max(m$x, m$y)+0.003), xlab = "kmer proportion NALM6 E/R de novo", ylab = "kmer proportion NALM6 E/R constitutive", main="RUNX Motif Frequency NALM6 E/R de novo vs. constitutive")
+plot(m$x, m$y, cex=0.3, xlim=c(0, max(m$x, m$y)+0.003), ylim=c(0, max(m$x, m$y)+0.003), xlab = "kmer proportion NALM6 E/R unique", ylab = "kmer proportion NALM6 E/R shared", main="RUNX Motif Frequency NALM6 E/R unique vs. shared")
 text(m$x, m$y-0.0007, m$Row.names, cex=0.6)
 abline(0, 1, lty=2)
 

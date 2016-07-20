@@ -14,6 +14,12 @@ reh.only <- length(reh.gr) - length(unique(o.at2.reh@subjectHits))
 plot(Venn(SetNames = c("AT2", "REH"), Weight = c("10" = at2.only, "11" = at2.and.reh, "01" = reh.only)), doWeights=TRUE, type="circles")
 grid.text(sprintf("ChIP-seq peak overlap (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+at2.and.reh.runxMotifPeaks <- round((sum(at2[unique(o.at2.reh@queryHits), "RunxNearSummit"]) + sum(reh[unique(o.at2.reh@subjectHits), "RunxNearSummit"]))/2)
+at2.only.runxMotifPeaks <- sum(at2$RunxNearSummit) - sum(at2[unique(o.at2.reh@queryHits), "RunxNearSummit"])
+reh.only.runxMotifPeaks <- sum(reh$RunxNearSummit) - sum(reh[unique(o.at2.reh@subjectHits), "RunxNearSummit"])
+plot(Venn(SetNames = c("AT2", "REH"), Weight = c("10" = at2.only.runxMotifPeaks, "11" = at2.and.reh.runxMotifPeaks, "01" = reh.only.runxMotifPeaks)), doWeights=TRUE, type="circles")
+grid.text(sprintf("ChIP-seq peak overlap (only peaks w/ RUNX motif, min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
 # AT2 vs REH peak score distributions
 
 plot(density(log(at2$`Peak Score`, 2)), xlim=c(1,10), col="blue", lwd=3, xlab="Peak score (log2)", main="AT2 and REH peak score distribution")
@@ -47,6 +53,12 @@ nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.nalm6.runx1.er@quer
 nalm6.er.only <- length(nalm6.er.gr) - length(unique(o.nalm6.runx1.er@subjectHits))
 plot(Venn(SetNames = c("NALM6 ER", "NALM6 RUNX1"), Weight = c("10" = nalm6.er.only, "11" = nalm6.runx1.and.er, "01" = nalm6.runx1.only)), doWeights=TRUE, type="circles")
 grid.text(sprintf("ChIP-seq peak overlap (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+nalm6.runx1.and.er.runxMotifPeaks <- round((sum(nalm6.runx1[unique(o.nalm6.runx1.er@queryHits), "RunxNearSummit"]) + sum(nalm6.er[unique(o.nalm6.runx1.er@subjectHits), "RunxNearSummit"]))/2)
+nalm6.runx1.only.runxMotifPeaks <- sum(nalm6.runx1$RunxNearSummit) - sum(nalm6.runx1[unique(o.nalm6.runx1.er@queryHits), "RunxNearSummit"])
+nalm6.er.only.runxMotifPeaks <- sum(nalm6.er$RunxNearSummit) - sum(nalm6.er[unique(o.nalm6.runx1.er@subjectHits), "RunxNearSummit"])
+plot(Venn(SetNames = c("NALM6 ER", "NALM6 RUNX1"), Weight = c("10" = nalm6.er.only.runxMotifPeaks, "11" = nalm6.runx1.and.er.runxMotifPeaks, "01" = nalm6.runx1.only.runxMotifPeaks)), doWeights=TRUE, type="circles")
+grid.text(sprintf("ChIP-seq peak overlap (only peaks w/ RUNX motif, min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
 # RUNX1 vs E/R peak score distributions
 
@@ -87,6 +99,16 @@ grid.newpage()
 plot(venn, gpList = gp)
 grid.text(sprintf("ChIP-seq peak overlap (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
+library(ChIPpeakAnno)
+o.nalm6er.at2.reh.runxMotifPeaks <- findOverlapsOfPeaks(nalm6.er.gr[nalm6.er.gr$mcols.RunxNearSummit], at2.gr[at2.gr$mcols.RunxNearSummit], reh.gr[reh.gr$mcols.RunxNearSummit], minoverlap=minoverlap, ignore.strand=TRUE, connectedPeaks = "merge")
+venn.counts.runxMotifPeaks <- o.nalm6er.at2.reh.runxMotifPeaks$venn_cnt[,4] 
+names(venn.counts.runxMotifPeaks) <- apply(o.nalm6er.at2.reh.runxMotifPeaks$venn_cnt[,1:3], 1, function(x) paste0(x, collapse="")) 
+venn <- compute.Venn(Venn(SetNames = c("NALM6 ER", "AT2", "REH"), Weight = venn.counts.runxMotifPeaks), doWeights = TRUE, type = "circles")
+gp <- VennThemes(venn, colourAlgorithm = "signature")
+grid.newpage()
+plot(venn, gpList = gp)
+grid.text(sprintf("ChIP-seq peak overlap (only peaks w/ RUNX motif, min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
 # score distributions NALM6 E/R vs AT2 vs REH
 
 par(mfrow=c(3,1))
@@ -108,36 +130,46 @@ legend("topright", c("only REH", "shared with NALM6 E/R"), fill=c("blue", "red")
 
 par(mfrow=c(1,1))
 
-# venn diagram AT2/REH vs. NALM-6 RUNX1 (= de novo vs. constitutive peaks)
+# venn diagram AT2/REH vs. NALM-6 RUNX1 (= unique vs. shared)
 
-o.nalm6runx1.at2 <- findOverlaps(nalm6.runx1.gr, at2.gr, minoverlap=minoverlap)
-o.nalm6runx1.reh <- findOverlaps(nalm6.runx1.gr, reh.gr, minoverlap=minoverlap)
-
-at2.and.nalm6.runx1 <- round((length(unique(o.nalm6runx1.at2@queryHits)) + length(unique(o.nalm6runx1.at2@subjectHits)))/2)
-at2.only <- length(at2.gr) - length(unique(o.nalm6runx1.at2@subjectHits))
-nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.nalm6runx1.at2@queryHits))
+at2.and.nalm6.runx1 <- round((length(unique(o.at2.nalm6.runx1@subjectHits)) + length(unique(o.at2.nalm6.runx1@queryHits)))/2)
+at2.only <- length(at2.gr) - length(unique(o.at2.nalm6.runx1@queryHits))
+nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.at2.nalm6.runx1@subjectHits))
 plot(Venn(SetNames = c("AT2", "NALM6 RUNX1"), Weight = c("10" = at2.only, "11" = at2.and.nalm6.runx1, "01" = nalm6.runx1.only)), doWeights=TRUE, type="circles")
-grid.text(sprintf("AT2 E/R de novo vs. constitutive peaks (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text(sprintf("AT2 E/R unique vs. shared peaks (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+at2.and.nalm6.runx1.runxMotifPeaks <- round((sum(at2[unique(o.at2.nalm6.runx1@queryHits), "RunxNearSummit"]) + sum(nalm6.runx1[unique(o.at2.nalm6.runx1@subjectHits), "RunxNearSummit"]))/2)
+at2.only.runxMotifPeaks <- sum(at2$RunxNearSummit) - sum(at2[unique(o.at2.nalm6.runx1@queryHits), "RunxNearSummit"])
+nalm6.runx1.only.runxMotifPeaks <- sum(nalm6.runx1$RunxNearSummit) - sum(nalm6.runx1[unique(o.at2.nalm6.runx1@subjectHits), "RunxNearSummit"])
+plot(Venn(SetNames = c("AT2", "NALM6 RUNX1"), Weight = c("10" = at2.only.runxMotifPeaks, "11" = at2.and.nalm6.runx1.runxMotifPeaks, "01" = nalm6.runx1.only.runxMotifPeaks)), doWeights=TRUE, type="circles")
+grid.text(sprintf("ChIP-seq peak overlap (only peaks w/ RUNX motif, min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
 
 reh.and.nalm6.runx1 <- round((length(unique(o.nalm6runx1.reh@queryHits)) + length(unique(o.nalm6runx1.reh@subjectHits)))/2)
 reh.only <- length(reh.gr) - length(unique(o.nalm6runx1.reh@subjectHits))
 nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.nalm6runx1.reh@queryHits))
 plot(Venn(SetNames = c("REH", "NALM6 RUNX1"), Weight = c("10" = reh.only, "11" = reh.and.nalm6.runx1, "01" = nalm6.runx1.only)), doWeights=TRUE, type="circles")
-grid.text(sprintf("REH E/R de novo vs. constitutive peaks (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text(sprintf("REH E/R unique vs. shared peaks (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
-# peaks found in all three E/R chips but not in RUNX1 chip (consensus de novo)
+reh.and.nalm6.runx1.runxMotifPeaks <- round((sum(reh[unique(o.reh.nalm6.runx1@queryHits), "RunxNearSummit"]) + sum(nalm6.runx1[unique(o.reh.nalm6.runx1@subjectHits), "RunxNearSummit"]))/2)
+reh.only.runxMotifPeaks <- sum(reh$RunxNearSummit) - sum(reh[unique(o.reh.nalm6.runx1@queryHits), "RunxNearSummit"])
+nalm6.runx1.only.runxMotifPeaks <- sum(nalm6.runx1$RunxNearSummit) - sum(nalm6.runx1[unique(o.reh.nalm6.runx1@subjectHits), "RunxNearSummit"])
+plot(Venn(SetNames = c("REH", "NALM6 RUNX1"), Weight = c("10" = reh.only.runxMotifPeaks, "11" = reh.and.nalm6.runx1.runxMotifPeaks, "01" = nalm6.runx1.only.runxMotifPeaks)), doWeights=TRUE, type="circles")
+grid.text(sprintf("ChIP-seq peak overlap (only peaks w/ RUNX motif, min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+
+# peaks found in all three E/R chips but not in RUNX1 chip (consensus unique)
 
 o.at2.reh.nalm6er.nalm6runx1 <- findOverlapsOfPeaks(at2.gr, reh.gr, nalm6.er.gr, nalm6.runx1.gr, minoverlap=minoverlap, ignore.strand=TRUE, connectedPeaks = "merge")
-denovo.peaknames <- unlist(o.at2.reh.nalm6er.nalm6runx1$peaklist$`at2.gr///reh.gr///nalm6.er.gr`$peakNames)
-denovo <- at2[unique(as.integer(gsub("at2.gr__", "", grep("at2.gr", denovo.peaknames, value=T)))),]
-#denovo <- denovo[denovo$`Distance to TSS` >= -5000 & denovo$`Distance to TSS` <= 1000,]
-write.table(denovo, "/mnt/projects/fiona/results/er-consensus-peaks-not-runx1.xls", row.names = F, col.names = T, quote = F, sep="\t", na = "")
+unique.peaknames <- unlist(o.at2.reh.nalm6er.nalm6runx1$peaklist$`at2.gr///reh.gr///nalm6.er.gr`$peakNames)
+unique <- at2[unique(as.integer(gsub("at2.gr__", "", grep("at2.gr", unique.peaknames, value=T)))),]
+#unique <- unique[unique$`Distance to TSS` >= -5000 & unique$`Distance to TSS` <= 1000,]
+write.table(unique, "/mnt/projects/fiona/results/er-consensus-peaks-not-runx1.xls", row.names = F, col.names = T, quote = F, sep="\t", na = "")
 
-# E/R peaks found to be better than RUNX1 peaks (i.e. higher peaks despite worse enrichment; less stringent as de novo)
+# E/R peaks found to be better than RUNX1 peaks (i.e. higher peaks despite worse enrichment; less stringent as unique)
 shared.peaknames <- unlist(o.at2.reh.nalm6er.nalm6runx1$peaklist$`at2.gr///reh.gr///nalm6.er.gr///nalm6.runx1.gr`$peakNames)
 shared <- at2[unique(as.integer(gsub("at2.gr__", "", grep("at2.gr", shared.peaknames, value=T)))),]
-shared <- shared[shared$runx1_overlap == "constitutive_better",]
-write.table(rbind(denovo, shared), "/mnt/projects/fiona/results/er-consensus-peaks-better-than-runx1.xls", row.names = F, col.names = T, quote = F, sep="\t", na = "")
+shared <- shared[shared$runx1_overlap == "shared_better",]
+write.table(rbind(unique, shared), "/mnt/projects/fiona/results/er-consensus-peaks-better-than-runx1.xls", row.names = F, col.names = T, quote = F, sep="\t", na = "")
 
 # scatter plot peak scores
 

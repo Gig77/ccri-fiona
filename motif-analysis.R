@@ -227,33 +227,33 @@ legend("topright", c("RUNX1", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
 par(mfrow=c(1,1))
 #dev.off()
 
-# barchart constitutive vs. de novo peaks
+# barchart shared vs. unique peaks
 
 d <- data.frame("CL" = character(0), "Motif" = character(0), "Class" = character(0), "Pct" = numeric(0), stringsAsFactors = F)
-d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "constitutive", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS", "constitutive", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "EBF", "constitutive", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "constitutive", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "RUNX1", "constitutive", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS", "constitutive", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "EBF", "constitutive", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "constitutive", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "constitutive", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "constitutive", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "constitutive", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "constitutive", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "de novo", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS", "de novo", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "EBF", "de novo", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "de novo", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "RUNX1", "de novo", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS", "de novo", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "EBF", "de novo", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "de novo", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "de novo", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "de novo", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "de novo", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "de novo", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "shared", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS", "shared", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "EBF", "shared", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "shared", sum(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.at2.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "RUNX1", "shared", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS", "shared", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "EBF", "shared", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "shared", sum(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.reh.nalm6.runx1@queryHits))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "shared", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "shared", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "shared", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "shared", sum(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / length(unique(o.nalm6.runx1.er@subjectHits))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "unique", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS", "unique", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "EBF", "unique", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "unique", sum(!(1:nrow(at2) %in% o.at2.nalm6.runx1@queryHits) & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "RUNX1", "unique", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS", "unique", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "EBF", "unique", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "unique", sum(!(1:nrow(reh) %in% o.reh.nalm6.runx1@queryHits) & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "unique", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "unique", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "unique", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "unique", sum(!(1:nrow(nalm6.er) %in% o.nalm6.runx1.er@subjectHits) & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / (nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits)))), names(d)))
 
 #pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
 ggplot(data = d, aes(x = CL, y = Pct, fill = Class)) +   
@@ -274,31 +274,31 @@ ggplot(data = d, aes(x = CL, y = Pct, fill = Class)) +
 # barchart E/R better vs. worse
 
 d <- data.frame("CL" = character(0), "Motif" = character(0), "Class" = character(0), "Pct" = numeric(0), stringsAsFactors = F)
-d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "de novo or better", sum(at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS", "de novo or better", sum(at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "EBF", "de novo or better", sum(at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "de novo or better", sum(at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "RUNX1", "de novo or better", sum(reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS", "de novo or better", sum(reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "EBF", "de novo or better", sum(reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "de novo or better", sum(reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "de novo or better", sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "de novo or better", sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "de novo or better", sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "de novo or better", sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "worse", sum(!at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS", "worse", sum(!at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "EBF", "worse", sum(!at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "worse", sum(!at2$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "RUNX1", "worse", sum(!reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS", "worse", sum(!reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "EBF", "worse", sum(!reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "worse", sum(!reh$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "worse", sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "worse", sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "worse", sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "worse", sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo") & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("constitutive_better","de novo"))), names(d)))
-d$Class <- factor(d$Class, levels=c("worse", "de novo or better"))
+d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "unique or better", sum(at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS", "unique or better", sum(at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "EBF", "unique or better", sum(at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "unique or better", sum(at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "RUNX1", "unique or better", sum(reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS", "unique or better", sum(reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "EBF", "unique or better", sum(reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "unique or better", sum(reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "unique or better", sum(nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "unique or better", sum(nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "unique or better", sum(nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "unique or better", sum(nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "RUNX1", "worse", sum(!at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS", "worse", sum(!at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "EBF", "worse", sum(!at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("AT2", "ETS:RUNX", "worse", sum(!at2$runx1_overlap %in% c("shared_better","unique") & !is.na(at2$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!at2$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "RUNX1", "worse", sum(!reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS", "worse", sum(!reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "EBF", "worse", sum(!reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("REH", "ETS:RUNX", "worse", sum(!reh$runx1_overlap %in% c("shared_better","unique") & !is.na(reh$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!reh$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "RUNX1", "worse", sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS", "worse", sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "EBF", "worse", sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d <- rbind(d, setNames(data.frame("NALM-6", "ETS:RUNX", "worse", sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique") & !is.na(nalm6.er$`ETS:RUNX(ETS,Runt)/Jurkat-RUNX1-ChIP-Seq(GSE17954)/Homer No. motifs`)) / sum(!nalm6.er$runx1_overlap %in% c("shared_better","unique"))), names(d)))
+d$Class <- factor(d$Class, levels=c("worse", "unique or better"))
 
 #pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
 ggplot(data = d, aes(x = CL, y = Pct, fill = Class)) +   
@@ -446,7 +446,7 @@ grid.text("NALM-6 ER Motif Overlap (shuffled peaks)", vp = viewport(x = 0.5, y =
 
 #dev.off()
 
-# motif composition constitutive RUNX1 vs. E/R de novo binding sites
+# motif composition shared RUNX1 vs. E/R unique binding sites
 
 #pdf("/mnt/projects/fiona/results/test.pdf", paper="a4")
 
@@ -454,98 +454,98 @@ grid.text("NALM-6 ER Motif Overlap (shuffled peaks)", vp = viewport(x = 0.5, y =
 
 idcol <- which(grepl("PeakID", names(at2)))
 
-print(sprintf("Number of constitutive peaks in AT2: %d", length(unique(o.at2.nalm6.runx1@queryHits))))
+print(sprintf("Number of shared peaks in AT2: %d", length(unique(o.at2.nalm6.runx1@queryHits))))
 
-peak.sets.at2.constitutive <- list(
+peak.sets.at2.shared <- list(
   "RUNX1" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
   "ETS" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
   "EBF" = at2[intersect(o.at2.nalm6.runx1@queryHits, which(!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
-venn <- compute.Venn(Venn(peak.sets.at2.constitutive), doWeights = TRUE, type = "circles")
+venn <- compute.Venn(Venn(peak.sets.at2.shared), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
 grid.newpage()
 plot(venn, gpList = gp)
-grid.text("AT2 motif overlap constitutive E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text("AT2 motif overlap shared E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
 
-print(sprintf("Number of de novo peaks in AT2: %d", nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits))))
+print(sprintf("Number of unique peaks in AT2: %d", nrow(at2)-length(unique(o.at2.nalm6.runx1@queryHits))))
 
-peak.sets.at2.denovo <- list(
+peak.sets.at2.unique <- list(
   "RUNX1" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
   "ETS" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
   "EBF" = at2[intersect((1:nrow(at2))[-o.at2.nalm6.runx1@queryHits], which(!is.na(at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
-venn <- compute.Venn(Venn(peak.sets.at2.denovo), doWeights = TRUE, type = "circles")
+venn <- compute.Venn(Venn(peak.sets.at2.unique), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
 grid.newpage()
 plot(venn, gpList = gp)
-grid.text("AT2 motif overlap de novo E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text("AT2 motif overlap unique E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
 # REH
 
 idcol <- which(grepl("PeakID", names(reh)))
 
-print(sprintf("Number of constitutive peaks in REH: %d", length(unique(o.reh.nalm6.runx1@queryHits))))
+print(sprintf("Number of shared peaks in REH: %d", length(unique(o.reh.nalm6.runx1@queryHits))))
 
-peak.sets.reh.constitutive <- list(
+peak.sets.reh.shared <- list(
   "RUNX1" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
   "ETS" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
   "EBF" = reh[intersect(o.reh.nalm6.runx1@queryHits, which(!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
-venn <- compute.Venn(Venn(peak.sets.reh.constitutive), doWeights = TRUE, type = "circles")
+venn <- compute.Venn(Venn(peak.sets.reh.shared), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
 grid.newpage()
 plot(venn, gpList = gp)
-grid.text("REH motif overlap constitutive E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text("REH motif overlap shared E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
-print(sprintf("Number of de novo peaks in REH: %d", nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits))))
+print(sprintf("Number of unique peaks in REH: %d", nrow(reh)-length(unique(o.reh.nalm6.runx1@queryHits))))
 
-peak.sets.reh.denovo <- list(
+peak.sets.reh.unique <- list(
   "RUNX1" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
   "ETS" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
   "EBF" = reh[intersect((1:nrow(reh))[-o.reh.nalm6.runx1@queryHits], which(!is.na(reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
-venn <- compute.Venn(Venn(peak.sets.reh.denovo), doWeights = TRUE, type = "circles")
+venn <- compute.Venn(Venn(peak.sets.reh.unique), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
 grid.newpage()
 plot(venn, gpList = gp)
-grid.text("REH motif overlap de novo E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text("REH motif overlap unique E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
 # NALM-6
 
 idcol <- which(grepl("PeakID", names(nalm6.er)))
 
-print(sprintf("Number of constitutive peaks in NALM-6 E/R: %d", length(unique(o.nalm6.runx1.er@subjectHits))))
+print(sprintf("Number of shared peaks in NALM-6 E/R: %d", length(unique(o.nalm6.runx1.er@subjectHits))))
 
-peak.sets.nalm6.er.constitutive <- list(
+peak.sets.nalm6.er.shared <- list(
   "RUNX1" = nalm6.er[intersect(o.nalm6.runx1.er@subjectHits, which(!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
   "ETS" = nalm6.er[intersect(o.nalm6.runx1.er@subjectHits, which(!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
   "EBF" = nalm6.er[intersect(o.nalm6.runx1.er@subjectHits, which(!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
-venn <- compute.Venn(Venn(peak.sets.nalm6.er.constitutive), doWeights = TRUE, type = "circles")
+venn <- compute.Venn(Venn(peak.sets.nalm6.er.shared), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
 grid.newpage()
 plot(venn, gpList = gp)
-grid.text("NALM-6 motif overlap constitutive E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text("NALM-6 motif overlap shared E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
-print(sprintf("Number of de novo peaks in NALM-6 E/R: %d", nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits))))
+print(sprintf("Number of unique peaks in NALM-6 E/R: %d", nrow(nalm6.er)-length(unique(o.nalm6.runx1.er@subjectHits))))
 
-peak.sets.nalm6.er.denovo <- list(
+peak.sets.nalm6.er.unique <- list(
   "RUNX1" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.runx1.er@subjectHits], which(!is.na(nalm6.er$`RUNX1(Runt)/Jurkat-RUNX1-ChIP-Seq(GSE29180)/Homer No. motifs`))),idcol],
   "ETS" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.runx1.er@subjectHits], which(!is.na(nalm6.er$`ETS1(ETS)/Jurkat-ETS1-ChIP-Seq(GSE17954)/Homer No. motifs`))),idcol],
   "EBF" = nalm6.er[intersect((1:nrow(nalm6.er))[-o.nalm6.runx1.er@subjectHits], which(!is.na(nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer No. motifs`))),idcol]
 )
 
-venn <- compute.Venn(Venn(peak.sets.nalm6.er.denovo), doWeights = TRUE, type = "circles")
+venn <- compute.Venn(Venn(peak.sets.nalm6.er.unique), doWeights = TRUE, type = "circles")
 gp <- VennThemes(venn, colourAlgorithm = "signature")
 grid.newpage()
 plot(venn, gpList = gp)
-grid.text("NALM-6 motif overlap de novo E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
+grid.text("NALM-6 motif overlap unique E/R peaks", vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
 # motif frequency proximal vs. distal
 

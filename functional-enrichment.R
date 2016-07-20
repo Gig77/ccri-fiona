@@ -54,12 +54,12 @@ nalm6.runx1.gs <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP22
 nalm6.er.gs <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER/")
 at2.gs.wRunx1Motif <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_runx1Motif/")
 at2.gs.woRunx1Motif <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_norunx1Motif/")
-at2.gs.denovo <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_denovo/")
-at2.gs.constitutive <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_constitutive/")
-reh.gs.denovo <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_denovo/")
-reh.gs.constitutive <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_constitutive/")
-nalm6.er.gs.denovo <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_denovo/")
-nalm6.er.gs.constitutive <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_constitutive/")
+at2.gs.unique <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_unique/")
+at2.gs.shared <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_AT2_ER_shared/")
+reh.gs.unique <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_unique/")
+reh.gs.shared <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP24_REH_ER_shared/")
+nalm6.er.gs.unique <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_unique/")
+nalm6.er.gs.shared <- readHomerEnrichments("/mnt/projects/fiona/results/homer/ChIP23_NALM6_ER_shared/")
 
 # scatter plot AT2 vs REH
 
@@ -100,49 +100,49 @@ dev.off()
 at2.wRunx1Motif.vs.woRunx1Motif[sign,][order(at2.wRunx1Motif.vs.woRunx1Motif$logP.wRunx1Motif[sign]),][1:10,]
 at2.wRunx1Motif.vs.woRunx1Motif[sign,][order(at2.wRunx1Motif.vs.woRunx1Motif$logP.woRunx1Motif[sign]),][1:10,]
 
-# scatter plot AT2 denovo vs. constitutive
+# scatter plot AT2 unique vs. shared
 
-at2.denovo.vs.constitutive <- merge(at2.gs.denovo[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], at2.gs.constitutive[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], by=c("Category", "TermID", "Term"), suffixes = c(".denovo", ".constitutive"), all=T)
-sign <- (at2.denovo.vs.constitutive$logP.denovo <= -4 | at2.denovo.vs.constitutive$logP.constitutive <= -4) & (at2.denovo.vs.constitutive$`Fraction of Targets in Term.denovo` > 0.05 | at2.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive` > 0.05)
-pdf("/mnt/projects/fiona/results/enrichment/at2-denovo-vs-constitutive.pdf")
-plot(at2.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign], 
-     at2.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign], cex=.3, 
-     xlab="AT2 de novo", 
-     ylab="AT2 constitutive",
+at2.unique.vs.shared <- merge(at2.gs.unique[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], at2.gs.shared[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], by=c("Category", "TermID", "Term"), suffixes = c(".unique", ".shared"), all=T)
+sign <- (at2.unique.vs.shared$logP.unique <= -4 | at2.unique.vs.shared$logP.shared <= -4) & (at2.unique.vs.shared$`Fraction of Targets in Term.unique` > 0.05 | at2.unique.vs.shared$`Fraction of Targets in Term.shared` > 0.05)
+pdf("/mnt/projects/fiona/results/enrichment/at2-unique-vs-shared.pdf")
+plot(at2.unique.vs.shared$`Fraction of Targets in Term.unique`[sign], 
+     at2.unique.vs.shared$`Fraction of Targets in Term.shared`[sign], cex=.3, 
+     xlab="AT2 unique", 
+     ylab="AT2 shared",
      main="AT2 fraction of genes in significant gene set (logP <= -4)")
-label <- at2.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign] > 0.15 & at2.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign] < 0.15
-topdiff <- at2.denovo.vs.constitutive[sign,][order(at2.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign]-at2.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign], decreasing = TRUE),]
-text(topdiff$`Fraction of Targets in Term.denovo`[1:10]+0.01, topdiff$`Fraction of Targets in Term.constitutive`[1:10], topdiff$Term[1:10], cex=.6, adj=0)
+label <- at2.unique.vs.shared$`Fraction of Targets in Term.unique`[sign] > 0.15 & at2.unique.vs.shared$`Fraction of Targets in Term.shared`[sign] < 0.15
+topdiff <- at2.unique.vs.shared[sign,][order(at2.unique.vs.shared$`Fraction of Targets in Term.unique`[sign]-at2.unique.vs.shared$`Fraction of Targets in Term.shared`[sign], decreasing = TRUE),]
+text(topdiff$`Fraction of Targets in Term.unique`[1:10]+0.01, topdiff$`Fraction of Targets in Term.shared`[1:10], topdiff$Term[1:10], cex=.6, adj=0)
 dev.off()
 
-# scatter plot AT2 denovo vs. constitutive
+# scatter plot AT2 unique vs. shared
 
-reh.denovo.vs.constitutive <- merge(reh.gs.denovo[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], reh.gs.constitutive[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], by=c("Category", "TermID", "Term"), suffixes = c(".denovo", ".constitutive"), all=T)
-sign <- (reh.denovo.vs.constitutive$logP.denovo <= -4 | reh.denovo.vs.constitutive$logP.constitutive <= -4) & (reh.denovo.vs.constitutive$`Fraction of Targets in Term.denovo` > 0.05 | reh.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive` > 0.05)
-pdf("/mnt/projects/fiona/results/enrichment/reh-denovo-vs-constitutive.pdf")
-plot(reh.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign], 
-     reh.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign], cex=.3, 
-     xlab="REH de novo", 
-     ylab="REH constitutive",
+reh.unique.vs.shared <- merge(reh.gs.unique[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], reh.gs.shared[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], by=c("Category", "TermID", "Term"), suffixes = c(".unique", ".shared"), all=T)
+sign <- (reh.unique.vs.shared$logP.unique <= -4 | reh.unique.vs.shared$logP.shared <= -4) & (reh.unique.vs.shared$`Fraction of Targets in Term.unique` > 0.05 | reh.unique.vs.shared$`Fraction of Targets in Term.shared` > 0.05)
+pdf("/mnt/projects/fiona/results/enrichment/reh-unique-vs-shared.pdf")
+plot(reh.unique.vs.shared$`Fraction of Targets in Term.unique`[sign], 
+     reh.unique.vs.shared$`Fraction of Targets in Term.shared`[sign], cex=.3, 
+     xlab="REH unique", 
+     ylab="REH shared",
      main="REH fraction of genes in significant gene set (logP <= -4)")
-label <- reh.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign] > 0.15 & reh.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign] < 0.15
-topdiff <- reh.denovo.vs.constitutive[sign,][order(reh.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign]-reh.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign], decreasing = TRUE),]
-text(topdiff$`Fraction of Targets in Term.denovo`[1:15]+0.01, topdiff$`Fraction of Targets in Term.constitutive`[1:15], topdiff$Term[1:15], cex=.6, adj=0)
+label <- reh.unique.vs.shared$`Fraction of Targets in Term.unique`[sign] > 0.15 & reh.unique.vs.shared$`Fraction of Targets in Term.shared`[sign] < 0.15
+topdiff <- reh.unique.vs.shared[sign,][order(reh.unique.vs.shared$`Fraction of Targets in Term.unique`[sign]-reh.unique.vs.shared$`Fraction of Targets in Term.shared`[sign], decreasing = TRUE),]
+text(topdiff$`Fraction of Targets in Term.unique`[1:15]+0.01, topdiff$`Fraction of Targets in Term.shared`[1:15], topdiff$Term[1:15], cex=.6, adj=0)
 dev.off()
 
-# scatter plot NALM-6 ER denovo vs. constitutive
+# scatter plot NALM-6 ER unique vs. shared
 
-nalm6.er.denovo.vs.constitutive <- merge(nalm6.er.gs.denovo[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], nalm6.er.gs.constitutive[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], by=c("Category", "TermID", "Term"), suffixes = c(".denovo", ".constitutive"), all=T)
-sign <- (nalm6.er.denovo.vs.constitutive$logP.denovo <= -4 | nalm6.er.denovo.vs.constitutive$logP.constitutive <= -4) & (nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.denovo` > 0.05 | nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive` > 0.05)
-pdf("/mnt/projects/fiona/results/enrichment/nalm6.er-denovo-vs-constitutive.pdf")
-plot(nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign], 
-     nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign], cex=.3, 
-     xlab="NALM6 ER de novo", 
-     ylab="NALM6 ER constitutive",
+nalm6.er.unique.vs.shared <- merge(nalm6.er.gs.unique[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], nalm6.er.gs.shared[,c("Category", "TermID", "Term", "logP", "Fraction of Targets in Term")], by=c("Category", "TermID", "Term"), suffixes = c(".unique", ".shared"), all=T)
+sign <- (nalm6.er.unique.vs.shared$logP.unique <= -4 | nalm6.er.unique.vs.shared$logP.shared <= -4) & (nalm6.er.unique.vs.shared$`Fraction of Targets in Term.unique` > 0.05 | nalm6.er.unique.vs.shared$`Fraction of Targets in Term.shared` > 0.05)
+pdf("/mnt/projects/fiona/results/enrichment/nalm6.er-unique-vs-shared.pdf")
+plot(nalm6.er.unique.vs.shared$`Fraction of Targets in Term.unique`[sign], 
+     nalm6.er.unique.vs.shared$`Fraction of Targets in Term.shared`[sign], cex=.3, 
+     xlab="NALM6 ER unique", 
+     ylab="NALM6 ER shared",
      main="NALM6 ER fraction of genes in significant gene set (logP <= -4)")
-label <- nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign] > 0.15 & nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign] < 0.15
-topdiff <- nalm6.er.denovo.vs.constitutive[sign,][order(nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.denovo`[sign]-nalm6.er.denovo.vs.constitutive$`Fraction of Targets in Term.constitutive`[sign], decreasing = TRUE),]
-text(topdiff$`Fraction of Targets in Term.denovo`[1:15]+0.01, topdiff$`Fraction of Targets in Term.constitutive`[1:15], topdiff$Term[1:15], cex=.6, adj=0)
+label <- nalm6.er.unique.vs.shared$`Fraction of Targets in Term.unique`[sign] > 0.15 & nalm6.er.unique.vs.shared$`Fraction of Targets in Term.shared`[sign] < 0.15
+topdiff <- nalm6.er.unique.vs.shared[sign,][order(nalm6.er.unique.vs.shared$`Fraction of Targets in Term.unique`[sign]-nalm6.er.unique.vs.shared$`Fraction of Targets in Term.shared`[sign], decreasing = TRUE),]
+text(topdiff$`Fraction of Targets in Term.unique`[1:15]+0.01, topdiff$`Fraction of Targets in Term.shared`[1:15], topdiff$Term[1:15], cex=.6, adj=0)
 dev.off()
 
 

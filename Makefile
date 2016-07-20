@@ -12,6 +12,7 @@ SAMTOOLS=/data_synology/software/samtools-1.1/samtools
 BEDTOOLS=/data_synology/software/bedtools-2.25.0/bin/bedtools
 FASTQC=/data_synology/software/FastQC-0.11.2/fastqc
 PICARD_MARKDUPLICATES=java -XX:+UseParallelGC -XX:ParallelGCThreads=8 -Xmx2g -Djava.io.tmpdir=`pwd`/tmp -jar /data_synology/software/picard-tools-1.114/MarkDuplicates.jar
+TOPN=1000
 
 SAMPLES_RNASEQ=32232_CGATGT_C80BJANXX_3_20150925B_20150925 \
 			   32233_TGACCA_C80BJANXX_3_20150925B_20150925 \
@@ -216,12 +217,12 @@ macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105
 	mkdir -p macs
 	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_RHD -q 0.01 --bw 1000 --nomodel --shiftsize=100 --broad 2>&1 | $(LOG)
 
-macs/%_topN_peaks.bed: macs/%_peaks.bed macs/%_summits.bed
-	head -5000 <(sort -k5,5nr $<) > $@.part
+macs/%_top$(TOPN)_peaks.bed: macs/%_peaks.bed
+	head -$(TOPN) <(sort -k5,5nr $<) > $@.part
 	cut -f 4 $@.part | sed 's/peak/summit/' > $@.summitids
-	grep -wf $@.summitids $(word 2, $^) > macs/$*_topN_summits.bed.part
+	grep -wf $@.summitids $(word 2, $^) > macs/$*_top$(TOPN)_summits.bed.part
 	mv $@.part $@
-	mv macs/$*_topN_summits.bed.part macs/$*_topN_summits.bed
+	mv macs/$*_top$(TOPN)_summits.bed.part macs/$*_top$(TOPN)_summits.bed
 	rm $@.summitids
 
 macs/%_runx1Motif_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
@@ -236,27 +237,27 @@ macs/%_norunx1Motif_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
 	mv macs/$*_norunx1Motif_summits.bed.part macs/$*_norunx1Motif_summits.bed
 	mv $@.part $@
 
-macs/%_constitutive_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "constitutive_better" || $$34 == "constitutive_worse") {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "constitutive_better" || $$34 == "constitutive_worse") {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_constitutive_summits.bed.part
-	mv macs/$*_constitutive_summits.bed.part macs/$*_constitutive_summits.bed
+macs/%_shared_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "shared_better" || $$34 == "shared_worse") {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "shared_better" || $$34 == "shared_worse") {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_shared_summits.bed.part
+	mv macs/$*_shared_summits.bed.part macs/$*_shared_summits.bed
 	mv $@.part $@
 
-macs/%_denovo_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "de novo" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "de novo" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_denovo_summits.bed.part
-	mv macs/$*_denovo_summits.bed.part macs/$*_denovo_summits.bed
+macs/%_unique_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "unique" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "unique" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_unique_summits.bed.part
+	mv macs/$*_unique_summits.bed.part macs/$*_unique_summits.bed
 	mv $@.part $@
 
 macs/%_better_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "de novo" || $$34 == "constitutive_better") {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "de novo" || $$34 == "constitutive_better") {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_better_summits.bed.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "unique" || $$34 == "shared_better") {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } ($$34 == "unique" || $$34 == "shared_better") {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_better_summits.bed.part
 	mv macs/$*_better_summits.bed.part macs/$*_better_summits.bed
 	mv $@.part $@
 
 macs/%_worse_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "constitutive_worse" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
-	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "constitutive_worse" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_worse_summits.bed.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "shared_worse" {print $$2,$$3,$$4,$$1,$$5}' $< | sed 's/^chr//' > $@.part
+	awk -F "\t" '{OFS="\t"} NR == 1 { next } $$34 == "shared_worse" {print $$2,$$27,$$27+1,$$1,$$5}' $< | sed 's/^chr//' | sed 's/MACS_peak/MACS_summit/' > macs/$*_worse_summits.bed.part
 	mv macs/$*_worse_summits.bed.part macs/$*_worse_summits.bed
 	mv $@.part $@
 
@@ -323,34 +324,34 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        homer/er_peaks.annotated.with-expr.tsv \
        homer/rhd_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_peaks.annotated.with-expr.tsv \
-			 homer/ChIP24_AT2_ER_topN_peaks.annotated.with-expr.tsv \
+	   homer/ChIP24_AT2_ER_top$(TOPN)_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_runx1Motif_peaks.annotated.tsv \
        homer/ChIP24_AT2_ER_norunx1Motif_peaks.annotated.tsv \
-       homer/ChIP24_AT2_ER_constitutive_peaks.annotated.tsv \
-       homer/ChIP24_AT2_ER_denovo_peaks.annotated.tsv \
+       homer/ChIP24_AT2_ER_shared_peaks.annotated.tsv \
+       homer/ChIP24_AT2_ER_unique_peaks.annotated.tsv \
        homer/ChIP24_AT2_ER_better_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_worse_peaks.annotated.with-expr.tsv \
        homer/ChIP24_AT2_ER_shuffled_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_peaks.annotated.with-expr.tsv \
-			 homer/ChIP24_REH_ER_topN_peaks.annotated.with-expr.tsv \
+	   homer/ChIP24_REH_ER_top$(TOPN)_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_runx1Motif_peaks.annotated.tsv \
        homer/ChIP24_REH_ER_norunx1Motif_peaks.annotated.tsv \
-       homer/ChIP24_REH_ER_constitutive_peaks.annotated.tsv \
-       homer/ChIP24_REH_ER_denovo_peaks.annotated.tsv \
+       homer/ChIP24_REH_ER_shared_peaks.annotated.tsv \
+       homer/ChIP24_REH_ER_unique_peaks.annotated.tsv \
        homer/ChIP24_REH_ER_better_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_worse_peaks.annotated.with-expr.tsv \
        homer/ChIP24_REH_ER_shuffled_peaks.annotated.with-expr.tsv \
        homer/ChIP22_NALM6_RUNX1_peaks.annotated.with-expr.tsv \
-			 homer/ChIP22_NALM6_RUNX1_topN_peaks.annotated.with-expr.tsv \
+	   homer/ChIP22_NALM6_RUNX1_top$(TOPN)_peaks.annotated.with-expr.tsv \
        homer/ChIP22_NALM6_RUNX1_runx1Motif_peaks.annotated.tsv \
        homer/ChIP22_NALM6_RUNX1_norunx1Motif_peaks.annotated.tsv \
        homer/ChIP22_NALM6_RUNX1_shuffled_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_peaks.annotated.with-expr.tsv \
-			 homer/ChIP23_NALM6_ER_topN_peaks.annotated.with-expr.tsv \
+	   homer/ChIP23_NALM6_ER_top$(TOPN)_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_runx1Motif_peaks.annotated.tsv \
        homer/ChIP23_NALM6_ER_norunx1Motif_peaks.annotated.tsv \
-       homer/ChIP23_NALM6_ER_constitutive_peaks.annotated.tsv \
-       homer/ChIP23_NALM6_ER_denovo_peaks.annotated.tsv \
+       homer/ChIP23_NALM6_ER_shared_peaks.annotated.tsv \
+       homer/ChIP23_NALM6_ER_unique_peaks.annotated.tsv \
        homer/ChIP23_NALM6_ER_better_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_worse_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_ER_shuffled_peaks.annotated.with-expr.tsv \
@@ -390,6 +391,7 @@ homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif home
 		$< \
 		hg19 \
 		-annStats homer/$*.annStats \
+		-gsize 3000000000 \
 		-genomeOntology homer/$*/ \
 		-go homer/$*/ \
 		-cons \
@@ -412,50 +414,54 @@ motifs: motifs/runx1_motifs.homer \
        motifs/er_motifs.homer \
        motifs/rhd_motifs.homer \
        motifs/ChIP24_AT2_ER_motifs.homer \
- 	   motifs/ChIP24_AT2_ER_topN_motifs.homer \
+ 	   motifs/ChIP24_AT2_ER_top$(TOPN)_motifs.homer \
        motifs/ChIP24_AT2_ER_runx1Motif_motifs.homer \
        motifs/ChIP24_AT2_ER_norunx1Motif_motifs.homer \
-       motifs/ChIP24_AT2_ER_constitutive_motifs.homer \
-       motifs/ChIP24_AT2_ER_denovo_motifs.homer \
+       motifs/ChIP24_AT2_ER_shared_motifs.homer \
+       motifs/ChIP24_AT2_ER_unique_motifs.homer \
        motifs/ChIP24_AT2_ER_better_motifs.homer \
        motifs/ChIP24_AT2_ER_worse_motifs.homer \
        motifs/ChIP24_AT2_ER_shuffled_motifs.homer \
        motifs/ChIP24_AT2_ER.motif_hits.tsv \
-       motifs/ChIP24_AT2_ER_topN.motif_hits.tsv \
+       motifs/ChIP24_AT2_ER_top$(TOPN).motif_hits.tsv \
        motifs/ChIP24_REH_ER_motifs.homer \
-	   motifs/ChIP24_REH_ER_topN_motifs.homer \
+	   motifs/ChIP24_REH_ER_top$(TOPN)_motifs.homer \
        motifs/ChIP24_REH_ER_runx1Motif_motifs.homer \
        motifs/ChIP24_REH_ER_norunx1Motif_motifs.homer \
-       motifs/ChIP24_REH_ER_constitutive_motifs.homer \
-       motifs/ChIP24_REH_ER_denovo_motifs.homer \
+       motifs/ChIP24_REH_ER_shared_motifs.homer \
+       motifs/ChIP24_REH_ER_unique_motifs.homer \
        motifs/ChIP24_REH_ER_better_motifs.homer \
        motifs/ChIP24_REH_ER_worse_motifs.homer \
        motifs/ChIP24_REH_ER_shuffled_motifs.homer \
        motifs/ChIP24_REH_ER.motif_hits.tsv \
-       motifs/ChIP24_REH_ER_topN.motif_hits.tsv \
+       motifs/ChIP24_REH_ER_top$(TOPN).motif_hits.tsv \
        motifs/ChIP23_NALM6_ER_motifs.homer \
-	   motifs/ChIP23_NALM6_ER_topN_motifs.homer \
+	   motifs/ChIP23_NALM6_ER_top$(TOPN)_motifs.homer \
        motifs/ChIP23_NALM6_ER_runx1Motif_motifs.homer \
        motifs/ChIP23_NALM6_ER_norunx1Motif_motifs.homer \
-       motifs/ChIP23_NALM6_ER_constitutive_motifs.homer \
-       motifs/ChIP23_NALM6_ER_denovo_motifs.homer \
+       motifs/ChIP23_NALM6_ER_shared_motifs.homer \
+       motifs/ChIP23_NALM6_ER_unique_motifs.homer \
        motifs/ChIP23_NALM6_ER_better_motifs.homer \
        motifs/ChIP23_NALM6_ER_worse_motifs.homer \
        motifs/ChIP23_NALM6_ER_shuffled_motifs.homer \
        motifs/ChIP23_NALM6_ER.motif_hits.tsv \
-       motifs/ChIP23_NALM6_ER_topN.motif_hits.tsv \
+       motifs/ChIP23_NALM6_ER_top$(TOPN).motif_hits.tsv \
        motifs/ChIP22_NALM6_RUNX1_motifs.homer \
-	   motifs/ChIP22_NALM6_RUNX1_topN_motifs.homer \
+	   motifs/ChIP22_NALM6_RUNX1_top$(TOPN)_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_runx1Motif_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_norunx1Motif_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_shuffled_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1.motif_hits.tsv \
-       motifs/ChIP22_NALM6_RUNX1_topN.motif_hits.tsv \
+       motifs/ChIP22_NALM6_RUNX1_top$(TOPN).motif_hits.tsv \
        motifs/ChIP23_NALM6_RHD_motifs.homer
 
-motifs/%_motifs.homer: homer/%_peaks.ucsc.bed
+motifs/%_summit-regions.bed: macs/%_peaks.bed /mnt/projects/fiona/scripts/summit2region.R
+	Rscript /mnt/projects/fiona/scripts/summit2region.R --summit-file macs/%_summits.bed --size 100 --out-file $@.part 2>&1 | $(LOG)
+	mv $@.part $@
+
+motifs/%_motifs.homer: motifs/%_summit-regions.bed
 	mkdir -p motifs/$*
-	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -size 200 -mask -p 15 -fdr 100 -dumpFasta > $@.part
+	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -nomotif -size given -mask -p 15 -fdr 100 -dumpFasta > $@.part
 	mv $@.part $@
 
 motifs/%.motif_hits.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif

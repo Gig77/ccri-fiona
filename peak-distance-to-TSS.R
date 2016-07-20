@@ -64,12 +64,12 @@ lines(density(nalm6.er$`Distance to TSS`/1000, n=5000, bw=3), col="blue", lwd=4)
 lines(density(nalm6.runx1$`Distance to TSS`/1000, n=5000, bw=3), col="red", lwd=4)
 legend("topright", c("E/R", "RUNX1", "random"), fill=c("blue", "red", "lightgray"), cex=1.6)
 
-# NALM6 E/R constitutive vs. de novo
+# NALM6 E/R shared vs. unique
 
 plot(NA, xlim=c(-50,50), ylim=c(0,0.05), xlab="Distance to nearest TSS (kb)", main="NALM6 E/R peak distance to nearest TSS", ylab="Density", cex.lab=1.5, cex.axis=1.3)
 polygon(density(nalm6.er.shuffled$`Distance to TSS`/1000, n=5000, bw=3), col="lightgray", border="lightgray")
 lines(density(nalm6.er$`Distance to TSS`[unique(o.nalm6.runx1.er@subjectHits)]/1000, n=5000, bw=3), col="blue", lwd=4)
 lines(density(nalm6.er$`Distance to TSS`[-unique(o.nalm6.runx1.er@subjectHits)]/1000, n=5000, bw=3), col="red", lwd=4)
-legend("topright", c("constitutive", "de novo", "random"), fill=c("blue", "red", "lightgray"), cex=1.6)
+legend("topright", c("shared", "unique", "random"), fill=c("blue", "red", "lightgray"), cex=1.6)
 
 dev.off()
