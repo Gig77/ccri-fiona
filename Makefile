@@ -6,7 +6,9 @@ LOG = perl -ne 'use POSIX qw(strftime); $$|=1; print strftime("%F %02H:%02M:%S "
 PROJECT_HOME=/mnt/projects/fiona
 DOCKER=docker run -i --rm --net=host -e DOCKER_UID=$$(id -u) -e DOCKER_UNAME=$$(id -un) -e DOCKER_GID=$$(id -g) -e DOCKER_GNAME=$$(id -gn) -e DOCKER_HOME=$$HOME -v /home:/home -v /data_synology:/data_synology -v /data:/data -v /data2:/data2 -v /home/cf/fiona/results/current:$(PROJECT_HOME)/results -v /home/cf/fiona/data:$(PROJECT_HOME)/data -w $$(pwd)
 MACS2=$(DOCKER) biowaste:5000/ccri/macs-2.0.9 macs2
-HOMER=$(DOCKER) -v /home/cf/fiona/results/current/homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt:/usr/local/homer/data/genomes/hg19/annotations/custom/Enhancer.ann.txt biowaste:5000/ccri/homer-4.7
+MACS211=$(DOCKER) biowaste:5000/ccri/macs-2.1.1 macs2
+#HOMER=$(DOCKER) -v /home/cf/fiona/results/current/homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt:/usr/local/homer/data/genomes/hg19/annotations/custom/custom.ann.txt biowaste:5000/ccri/homer-4.7
+HOMER=$(DOCKER) biowaste:5000/ccri/homer-4.7
 BWA=/data_synology/software/bwa-0.7.12/bwa
 SAMTOOLS=/data_synology/software/samtools-1.1/samtools
 BEDTOOLS=/data_synology/software/bedtools-2.25.0/bin/bedtools
@@ -39,7 +41,7 @@ SAMPLES_CHIPSEQ_2ND_BATCH=35115_ACAGTG_C81DHANXX_8_20160104B_20160104 \
                           35123_TAGCTT_C8202ANXX_3_20160105B_20160105 \
                           35124_GGCTAC_C8202ANXX_3_20160105B_20160105
 
-all: fastqc bwa flagstat homer motifs
+all: fastqc bwa flagstat homer motifs motifHeatmap.pdf
 
 #-----------------------------------------------------------------------------------------
 
@@ -199,19 +201,25 @@ macs/rhd_peaks.bed: bwa/32241_GCCAAT_C80K5ANXX_6_20150930B_20150930.bwa.sorted.f
 
 macs/ChIP24_AT2_ER_peaks.bed: bwa/35116_GCCAAT_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam bwa/35115_ACAGTG_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
 	mkdir -p macs
-	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP24_AT2_ER -q 0.01 --broad 2>&1 | $(LOG)
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP24_AT2_ER -q 0.01 2>&1 | $(LOG)
 
 macs/ChIP24_REH_ER_peaks.bed: bwa/35118_CTTGTA_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam bwa/35117_CAGATC_C81DHANXX_8_20160104B_20160104.bwa.sorted.filtered.bam
 	mkdir -p macs
-	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP24_REH_ER -q 0.01 --broad 2>&1 | $(LOG)
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP24_REH_ER -q 0.01 2>&1 | $(LOG)
 
 macs/ChIP22_NALM6_RUNX1_peaks.bed: bwa/35120_TGACCA_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam bwa/35119_CGATGT_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
 	mkdir -p macs
-	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP22_NALM6_RUNX1 -q 0.01 --broad 2>&1 | $(LOG)
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP22_NALM6_RUNX1 -q 0.01 2>&1 | $(LOG)
+
+macs211/ChIP22_NALM6_RUNX1_peaks.bed: bwa/35120_TGACCA_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam bwa/35119_CGATGT_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
+	mkdir -p macs211
+	WD=$$(pwd) && cd macs211 && $(MACS211) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP22_NALM6_RUNX1 -q 0.01 --call-summits 2>&1 | $(LOG)
+	awk -F "\t" '{OFS="\t"} NR < 30 { next } {print $$1,$$2,$$3,$$10,$$7}' macs211/ChIP22_NALM6_RUNX1_peaks.xls > $@.part
+	mv $@.part $@
 
 macs/ChIP23_NALM6_ER_peaks.bed: bwa/35122_GATCAG_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam bwa/35121_ACTTGA_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
 	mkdir -p macs
-	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_ER -q 0.01 --broad 2>&1 | $(LOG)
+	WD=$$(pwd) && cd macs && $(MACS2) callpeak -t $$WD/$(word 1, $^) -c $$WD/$(word 2, $^) -f BAM -g hs -n ChIP23_NALM6_ER -q 0.01 2>&1 | $(LOG)
 
 macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam bwa/35123_TAGCTT_C8202ANXX_3_20160105B_20160105.bwa.sorted.filtered.bam
 	mkdir -p macs
@@ -220,7 +228,7 @@ macs/ChIP23_NALM6_RHD_peaks.bed: bwa/35124_GGCTAC_C8202ANXX_3_20160105B_20160105
 macs/%_top$(TOPN)_peaks.bed: macs/%_peaks.bed
 	head -$(TOPN) <(sort -k5,5nr $<) > $@.part
 	cut -f 4 $@.part | sed 's/peak/summit/' > $@.summitids
-	grep -wf $@.summitids $(word 2, $^) > macs/$*_top$(TOPN)_summits.bed.part
+	grep -wf $@.summitids macs/$*_summits.bed > macs/$*_top$(TOPN)_summits.bed.part
 	mv $@.part $@
 	mv macs/$*_top$(TOPN)_summits.bed.part macs/$*_top$(TOPN)_summits.bed
 	rm $@.summitids
@@ -262,12 +270,12 @@ macs/%_worse_peaks.bed: homer/%_peaks.annotated.with-expr.tsv
 	mv $@.part $@
 
 macs/%_shuffled_peaks.bed: macs/%_peaks.bed /mnt/projects/generic/data/broad/human_g1k_v37.chromsizes.tsv bedtools/%.zeroInputCoverage.bed
-	$(BEDTOOLS) shuffle -chrom -l 4711 -i $< -g $(word 2, $^) -excl $(word 3, $^) > $@.part
+	$(BEDTOOLS) shuffle -chrom -seed 4711 -i $< -g $(word 2, $^) -excl $(word 3, $^) > $@.part
 	awk -F "\t" '{OFS="\t"} {summit=sprintf("%d", $$2+($$3-$$2)/2) ; print $$1,summit,summit+1,$$4,$$5}' $@.part > macs/$*_shuffled_summits.bed.part
 	mv macs/$*_shuffled_summits.bed.part macs/$*_shuffled_summits.bed
 	mv $@.part $@
 
-macs/diffbind_ER_vs_RUNX_peaks.bed: /mnt/projects/fiona/scripts/diffBind.R
+macs/diffbind_ER_vs_RUNX_peaks.bed: $(PROJECT_HOME)/scripts/diffBind.R
 	Rscript $<
 	mv $@.part $@
 
@@ -358,21 +366,35 @@ homer: homer/runx1_peaks.annotated.with-expr.tsv \
        homer/ChIP23_NALM6_RHD_peaks.annotated.with-expr.tsv \
        homer/diffbind_ER_vs_RUNX_peaks.annotated.with-expr.tsv
 
-homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt: /mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedHelas3.bed \
-														/mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedHuvec.bed \
-														/mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedGm12878.bed \
-														/mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedH1hesc.bed \
-														/mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedHepg2.bed \
-														/mnt/projects/fiona/data/enhancers/wgEncodeAwgSegmentationCombinedK562.bed
+homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt: $(PROJECT_HOME)/data/enhancers/wgEncodeAwgSegmentationCombinedHelas3.bed \
+														$(PROJECT_HOME)/data/enhancers/wgEncodeAwgSegmentationCombinedHuvec.bed \
+														$(PROJECT_HOME)/data/enhancers/wgEncodeAwgSegmentationCombinedGm12878.bed \
+														$(PROJECT_HOME)/data/enhancers/wgEncodeAwgSegmentationCombinedH1hesc.bed \
+														$(PROJECT_HOME)/data/enhancers/wgEncodeAwgSegmentationCombinedHepg2.bed \
+														$(PROJECT_HOME)/data/enhancers/wgEncodeAwgSegmentationCombinedK562.bed
+	mkdir -p homer
 	cat $^ | grep -P "\tE\t" | sort -k 1,1 -k2n,2n | $(BEDTOOLS) merge -nobuf -i stdin \
 		| perl -lane '$$id++; print "Enhancer-$$id\t$$F[0]\t$$F[1]\t$$F[2]\t0\tEnhancer"' > $@.part
 	mv $@.part $@
 
-motifs/all_motifs.motif: /mnt/projects/fiona/data/runx1.motif \
-												 /mnt/projects/fiona/data/ets1.motif \
-												 /mnt/projects/fiona/data/ebf.motif \
-												 /mnt/projects/fiona/data/gata3.motif \
-												 /mnt/projects/fiona/data/ets_runx.motif
+homer/custom.ann.txt: $(PROJECT_HOME)/data/homer-annotations/hg19.basic.promoterTSS \
+					  $(PROJECT_HOME)/data/homer-annotations/hg19.basic.TTS \
+					  $(PROJECT_HOME)/data/homer-annotations/hg19.basic.fiveUTR \
+					  $(PROJECT_HOME)/data/homer-annotations/hg19.basic.threeUTR \
+					  $(PROJECT_HOME)/data/homer-annotations/hg19.basic.exon \
+					  $(PROJECT_HOME)/data/homer-annotations/hg19.basic.noncoding \
+					  homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt \
+					  $(PROJECT_HOME)/data/homer-annotations/hg19.basic.intron
+	cat $^ > $@.raw
+	$(HOMER) assignGenomeAnnotation $@.raw $@.raw -prioritize $@.part
+	rm $@.raw
+	mv $@.part $@
+
+motifs/all_motifs.motif: $(PROJECT_HOME)/data/runx1.motif \
+												 $(PROJECT_HOME)/data/ets1.motif \
+												 $(PROJECT_HOME)/data/ebf.motif \
+												 $(PROJECT_HOME)/data/gata3.motif \
+												 $(PROJECT_HOME)/data/ets_runx.motif
 	mkdir -p motifs
 	cat $^ > $@.part
 	mv $@.part $@
@@ -382,14 +404,15 @@ homer/%_peaks.ucsc.bed: macs/%_peaks.bed
 	cat $< | perl -ne 'if (/^(\d|X|Y)/) { print "chr$$_" } else { print $$_ }' > $@.part
 	mv $@.part $@
 
-Tijssen_2011_TableS1_peak_coordinates.hg19.txt: /mnt/projects/fiona/scripts/liftover_tijssen.R /mnt/projects/fiona/data/Tijssen_2011_TableS1_peak_coordinates.txt
-	Rscript /mnt/projects/fiona/scripts/liftover_tijssen.R
+Tijssen_2011_TableS1_peak_coordinates.hg19.txt: $(PROJECT_HOME)/scripts/liftover_tijssen.R $(PROJECT_HOME)/data/Tijssen_2011_TableS1_peak_coordinates.txt
+	Rscript $(PROJECT_HOME)/scripts/liftover_tijssen.R
 
-homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif homer/wgEncodeAwgSegmentationCombinedEnhancers.ann.txt
+homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif homer/custom.ann.txt
 	mkdir -p homer/$*
 	$(HOMER) annotatePeaks.pl \
 		$< \
 		hg19 \
+		-ann homer/custom.ann.txt \
 		-annStats homer/$*.annStats \
 		-gsize 3000000000 \
 		-genomeOntology homer/$*/ \
@@ -402,10 +425,10 @@ homer/%_peaks.annotated.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif home
 	mv $@.part $@
 	cat homer/$*_peaks.runx1-motif.bed | grep -v "^track" | sort -k 1,1 -k2g,2g > homer/$*-peak-motifs.sorted.bed
 
-homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv Tijssen_2011_TableS1_peak_coordinates.hg19.txt /mnt/projects/fiona/scripts/annotate-peaks.R
-	Rscript /mnt/projects/fiona/scripts/annotate-peaks.R --homer-peak-file $(word 1, $^) --macs-peak-file macs/$*_peaks.bed --summit-file macs/$*_summits.bed --out-file $@.part
+homer/%_peaks.annotated.with-expr.tsv: homer/%_peaks.annotated.tsv anduril/execute/deseqAnnotated_oeERvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB1/table.csv anduril/execute/deseqAnnotated_oeERvsEmptyB2/table.csv anduril/execute/deseqAnnotated_oeRHDvsEmptyB2/table.csv homer/ChIP22_NALM6_RUNX1_peaks.annotated.tsv Tijssen_2011_TableS1_peak_coordinates.hg19.txt $(PROJECT_HOME)/scripts/annotate-peaks.R
+	Rscript $(PROJECT_HOME)/scripts/annotate-peaks.R --homer-peak-file $(word 1, $^) --macs-peak-file macs/$*_peaks.bed --summit-file macs/$*_summits.bed --out-file $@.part
 	mv $@.part $@
-
+	
 # --------------------------------------------------------------------------------
 # motif discovery (Homer)
 # --------------------------------------------------------------------------------
@@ -455,14 +478,17 @@ motifs: motifs/runx1_motifs.homer \
        motifs/ChIP22_NALM6_RUNX1_top$(TOPN).motif_hits.tsv \
        motifs/ChIP23_NALM6_RHD_motifs.homer
 
-motifs/%_summit-regions.bed: macs/%_peaks.bed /mnt/projects/fiona/scripts/summit2region.R
-	Rscript /mnt/projects/fiona/scripts/summit2region.R --summit-file macs/%_summits.bed --size 100 --out-file $@.part 2>&1 | $(LOG)
+motifs/%_summit-regions.bed: macs/%_peaks.bed $(PROJECT_HOME)/scripts/summit2region.R
+	mkdir -p motifs
+	Rscript $(PROJECT_HOME)/scripts/summit2region.R --summit-file macs/$*_summits.bed --size 100 --out-file $@.part 2>&1 | $(LOG)
 	mv $@.part $@
 
 motifs/%_motifs.homer: motifs/%_summit-regions.bed
-	mkdir -p motifs/$*
-	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -nomotif -size given -mask -p 15 -fdr 100 -dumpFasta > $@.part
-	mv $@.part $@
+	mkdir -p motifs
+	rm -rf $@ motifs/$*
+	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$* -size given -len 8,10,12,15,20 -mask -p 20 -fdr 100 -dumpFasta 2>&1 | $(LOG)
+	test -s motifs/$*/homerResults.html
+	touch $@
 
 motifs/%.motif_hits.tsv: homer/%_peaks.ucsc.bed motifs/all_motifs.motif
 	$(HOMER) findMotifsGenome.pl $< hg19 motifs/$*.tmp -find motifs/all_motifs.motif > $@.part
@@ -473,6 +499,10 @@ wgEncodeDacMapabilityConsensusExcludable.bed:
 	wget http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeMapability/wgEncodeDacMapabilityConsensusExcludable.bed.gz
 	gunzip $@.gz
 	sed 's/^chr//' $@ > wgEncodeDacMapabilityConsensusExcludable.nochr.bed
+
+motifHeatmap.pdf: $(foreach S, ChIP24_AT2_ER ChIP24_REH_ER ChIP23_NALM6_ER ChIP22_NALM6_RUNX1 ChIP24_AT2_ER_unique ChIP24_REH_ER_unique ChIP23_NALM6_ER_unique ChIP24_AT2_ER_shared ChIP24_REH_ER_shared ChIP23_NALM6_ER_shared, motifs/$S_motifs.homer) $(PROJECT_HOME)/scripts/motifHeatmap.R
+	rm -f $@
+	Rscript $(PROJECT_HOME)/scripts/motifHeatmap.R
 
 # --------------------------------------------------------------------------------
 # GSEA

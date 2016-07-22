@@ -145,9 +145,9 @@ plot(Venn(SetNames = c("AT2", "NALM6 RUNX1"), Weight = c("10" = at2.only.runxMot
 grid.text(sprintf("ChIP-seq peak overlap (only peaks w/ RUNX motif, min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
 
-reh.and.nalm6.runx1 <- round((length(unique(o.nalm6runx1.reh@queryHits)) + length(unique(o.nalm6runx1.reh@subjectHits)))/2)
-reh.only <- length(reh.gr) - length(unique(o.nalm6runx1.reh@subjectHits))
-nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.nalm6runx1.reh@queryHits))
+reh.and.nalm6.runx1 <- round((length(unique(o.reh.nalm6.runx1@queryHits)) + length(unique(o.reh.nalm6.runx1@subjectHits)))/2)
+reh.only <- length(reh.gr) - length(unique(o.reh.nalm6.runx1@queryHits))
+nalm6.runx1.only <- length(nalm6.runx1.gr) - length(unique(o.reh.nalm6.runx1@subjectHits))
 plot(Venn(SetNames = c("REH", "NALM6 RUNX1"), Weight = c("10" = reh.only, "11" = reh.and.nalm6.runx1, "01" = nalm6.runx1.only)), doWeights=TRUE, type="circles")
 grid.text(sprintf("REH E/R unique vs. shared peaks (min. score = %d, min. overlap = %d bp)", minscore, minoverlap), vp = viewport(x = 0.5, y = 0.98, w=unit(1, "npc"), h=unit(1, "npc")))
 
