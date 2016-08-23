@@ -36,6 +36,22 @@ regions = rbind(regions, setNames(data.frame("TSPEAR", "chr21", 45900577, 459493
 regions = rbind(regions, setNames(data.frame("SH3BP1", "chr22", 38026127, 38041161, "meta", stringsAsFactors = F), names(regions)))
 regions = rbind(regions, setNames(data.frame("ZCCHC5", "chrX", 77907787, 77921669, "meta", stringsAsFactors = F), names(regions)))
 
+# PCR primer coordinates
+
+primer <- data.frame(name=character(0), seqnames=character(0), start=numeric(0), end=numeric(0))
+primer <- rbind(primer, setNames(data.frame("RUNX1 P1 fwd", "chr21", 36421571, 36421592, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("RUNX1 P1 rev", "chr21", 36421490, 36421513, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("RUNX1 neg fwd", "chr21", 36410740, 36410759, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("RUNX1 neg rev", "chr21", 36410622, 36410641, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("MDM2 RUNX motif fwd", "chr12", 69202705, 69202726, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("MDM2 RUNX motif rev", "chr12", 69202872, 69202895, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("MDM2 RUNX neg fwd", "chr12", 69207256, 69207277, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("MDM2 RUNX neg rev", "chr12", 69207357, 69207382, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("ID-2 fwd #3", "chr2", 8822297, 8822316, stringsAsFactors = F), names(primer)))
+primer <- rbind(primer, setNames(data.frame("ID-2 rev #3", "chr2", 8822358, 8822377, stringsAsFactors = F), names(primer)))
+primer.track <- AnnotationTrack(makeGRangesFromDataFrame(primer), name="Primer", stacking="dense", min.height=1, rot.title=0, 
+                            col="black", lwd.border=1, fontsize=10, col.title="white")
+
 pdf("/mnt/projects/fiona/results/region-plots/regions.chipseq.coverage.pdf", height=8, width=12)
 
 for (i in 1:nrow(regions)) {
@@ -56,6 +72,8 @@ for (i in 1:nrow(regions)) {
                                        fontsize=16, fontcolor.group="black", background.title="white")
   seqlevels(ranges(gene.track)) <- sprintf("chr%s", seqlevels(ranges(gene.track)))
   chromosome(gene.track)=chr
+  
+  chromosome(primer.track) <- chr ; primer.track.region <- subset(primer.track, start, end)
   
   chromosome(at2.er.chip) <- chr ; at2.er.chip.region <- subset(at2.er.chip, start, end)
   chromosome(at2.er.input) <- chr ; at2.er.input.region <- subset(at2.er.input, start, end)
@@ -78,8 +96,14 @@ for (i in 1:nrow(regions)) {
                                values(nalm6.er.chip.region), values(nalm6.er.input.region), 
                                values(nalm6.runx1.chip.region), values(nalm6.runx1.input.region))))
   
-  plotTracks(list(ideogram.track, axis.track, gene.track, at2.er, reh.er, nalm6.runx1, nalm6.er), 
-             from=start, to=end, title.width=1, main=name,
-             cex.title = 0.7, cex.axis=0.5, ylim = ylims)
+  if (length(primer.track.region) > 0) {
+    plotTracks(list(ideogram.track, axis.track, gene.track, primer.track.region, at2.er, reh.er, nalm6.er, nalm6.runx1), 
+               from=start, to=end, title.width=1, main=name,
+               cex.title = 0.9, cex.axis=0.5, fontcolor.title="black", col.axis="black", ylim = ylims)
+  } else {
+    plotTracks(list(ideogram.track, axis.track, gene.track, at2.er, reh.er, nalm6.er, nalm6.runx1), 
+               from=start, to=end, title.width=1, main=name,
+               cex.title = 0.9, cex.axis=0.5, fontcolor.title="black", col.axis="black", ylim = ylims)
+  }
 }
 dev.off()
