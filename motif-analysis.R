@@ -106,8 +106,8 @@ ggplot(data = d, aes(x = CountMotifs, y = CountPeaks, fill = CL)) +
   geom_bar(position = position_dodge(), stat = "identity", width=0.7) +
   facet_wrap(~Motif, ncol=3) +
   coord_fixed(ratio=6) +
-  labs(fill="Cell line", x="No. canonical motifs near peak", y="% peaks") + 
-  ggtitle("No. canonical motifs near peaks") +
+  labs(fill="Cell line", x="# canonical motifs near peak summit", y="% peaks") + 
+  ggtitle("No. canonical motifs near peak summits") +
   theme_bw() +
   scale_y_continuous(breaks = seq(0, 1, 0.1)) +
   scale_fill_manual(values = c("red", "darkgray", "blue", "black")) +
@@ -120,8 +120,8 @@ ggplot(data = d.shuffled, aes(x = CountMotifs, y = CountPeaks, fill = CL)) +
   geom_bar(position = position_dodge(), stat = "identity", width=0.7) +
   facet_wrap(~Motif, ncol=3) +
   coord_fixed(ratio=6) +
-  labs(fill="Cell line", x="No. canonical motifs near peak", y="% peaks") + 
-  ggtitle("No. canoncial motifs near random (shuffled) peaks") +
+  labs(fill="Cell line", x="# canonical motifs near peak summit", y="% peaks") + 
+  ggtitle("No. canoncial motifs near summits of randomly shuffled peaks") +
   theme_bw() +
   scale_y_continuous(breaks = seq(0, 1, 0.1)) +
   scale_fill_manual(values = c("red", "darkgray", "blue", "black")) +
@@ -146,11 +146,11 @@ at2.ets.dist <- unlist(sapply(at2.ets.dist[at2.ets.dist != ""], function(x) { d 
 at2.ebf.dist <- at2$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer Distance From Summit`
 at2.ebf.dist <- unlist(sapply(at2.ebf.dist[at2.ebf.dist != ""], function(x) { d <- as.numeric(unlist(strsplit(x, ","))) ; d[abs(d)==min(abs(d))] }))
 
-plot(density(at2.runx1.dist, adjust=1), xlim=c(-200,200), col="red", lwd=3, main="AT2 motif distance from summit", xlab="Distance from peak summit (bp)")
-lines(density(at2.ets.dist, adjust=1), xlim=c(-200,200), col="darkgray", lwd=3)
-lines(density(at2.ebf.dist, adjust=1), xlim=c(-200,200), col="blue", lwd=3)
+plot(density(at2.runx1.dist, bw=12), xlim=c(-200,200), col="red", lwd=3, main="AT2", xlab="Motif distance from peak summit (bp)")
+lines(density(at2.ets.dist, bw=12), xlim=c(-200,200), col="darkgray", lwd=3)
+lines(density(at2.ebf.dist, bw=12), xlim=c(-200,200), col="blue", lwd=3)
 abline(v=0, lty=2)
-legend("topright", c("RUNX1", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
+legend("topright", c("RUNX", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
 
 # distance b/w RUNX and ETS motif
 
@@ -174,10 +174,10 @@ at2.better.runx1.ets.dist <- unlist(apply(at2.better.runx1.ets.dist, 1, function
   m1-m2
 }))
 
-plot(density(at2.runx1.ets.dist, adjust=1), xlim=c(-200,200), col="red", lwd=3, main="AT2 distance between RUNX and ETS motif", xlab="Distance between motifs (bp)")
-lines(density(at2.better.runx1.ets.dist, adjust=1), xlim=c(-200,200), col="blue", lwd=3)
-abline(v=0, lty=2)
-legend("topright", c("all peaks", "better than RUNX1"), fill=c("red", "blue"))
+#plot(density(at2.runx1.ets.dist, adjust=1), xlim=c(-200,200), col="red", lwd=3, main="AT2 distance between RUNX and ETS motif", xlab="Distance between motifs (bp)")
+#lines(density(at2.better.runx1.ets.dist, adjust=1), xlim=c(-200,200), col="blue", lwd=3)
+#abline(v=0, lty=2)
+#legend("topright", c("all peaks", "better than RUNX1"), fill=c("red", "blue"))
 
 # REH
 
@@ -188,11 +188,11 @@ reh.ets.dist <- unlist(sapply(reh.ets.dist[reh.ets.dist != ""], function(x) { d 
 reh.ebf.dist <- reh$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer Distance From Summit`
 reh.ebf.dist <- unlist(sapply(reh.ebf.dist[reh.ebf.dist != ""], function(x) { d <- as.numeric(unlist(strsplit(x, ","))) ; d[abs(d)==min(abs(d))] }))
 
-plot(density(reh.runx1.dist), xlim=c(-200,200), col="red", lwd=3, main="REH motif distance from summit", xlab="Distance from peak summit (bp)")
-lines(density(reh.ets.dist), xlim=c(-200,200), col="darkgray", lwd=3)
-lines(density(reh.ebf.dist, adjust=1), xlim=c(-200,200), col="blue", lwd=3)
+plot(density(reh.runx1.dist, bw=12), xlim=c(-200,200), col="red", lwd=3, main="REH", xlab="Motif distance from peak summit (bp)")
+lines(density(reh.ets.dist, bw=12), xlim=c(-200,200), col="darkgray", lwd=3)
+lines(density(reh.ebf.dist, bw=12), xlim=c(-200,200), col="blue", lwd=3)
 abline(v=0, lty=2)
-legend("topright", c("RUNX1", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
+legend("topright", c("RUNX", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
 
 # NALM6 ER
 
@@ -203,11 +203,11 @@ nalm6.er.ets.dist <- unlist(sapply(nalm6.er.ets.dist[nalm6.er.ets.dist != ""], f
 nalm6.er.ebf.dist <- nalm6.er$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer Distance From Summit`
 nalm6.er.ebf.dist <- unlist(sapply(nalm6.er.ebf.dist[nalm6.er.ebf.dist != ""], function(x) { d <- as.numeric(unlist(strsplit(x, ","))) ; d[abs(d)==min(abs(d))] }))
 
-plot(density(nalm6.er.runx1.dist), xlim=c(-200,200), col="red", lwd=3, main="NALM-6 ER motif distance from summit", xlab="Distance from peak summit (bp)")
-lines(density(nalm6.er.ets.dist), xlim=c(-200,200), col="darkgray", lwd=3)
-lines(density(nalm6.er.ebf.dist, adjust=1), xlim=c(-200,200), col="blue", lwd=3)
+plot(density(nalm6.er.runx1.dist, bw=12), xlim=c(-200,200), col="red", lwd=3, main="NALM-6 ER", xlab="Motif distance from peak summit (bp)")
+lines(density(nalm6.er.ets.dist, bw=12), xlim=c(-200,200), col="darkgray", lwd=3)
+lines(density(nalm6.er.ebf.dist, bw=12), xlim=c(-200,200), col="blue", lwd=3)
 abline(v=0, lty=2)
-legend("topright", c("RUNX1", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
+legend("topright", c("RUNX", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
 
 # NALM6 RUNX1
 
@@ -218,11 +218,11 @@ nalm6.runx1.ets.dist <- unlist(sapply(nalm6.runx1.ets.dist[nalm6.runx1.ets.dist 
 nalm6.runx1.ebf.dist <- nalm6.runx1$`EBF(EBF)/proBcell-EBF-ChIP-Seq(GSE21978)/Homer Distance From Summit`
 nalm6.runx1.ebf.dist <- unlist(sapply(nalm6.runx1.ebf.dist[nalm6.runx1.ebf.dist != ""], function(x) { d <- as.numeric(unlist(strsplit(x, ","))) ; d[abs(d)==min(abs(d))] }))
 
-plot(density(nalm6.runx1.runx1.dist), xlim=c(-200,200), col="red", lwd=3, main="NALM-6 RUNX1 motif distance from summit", xlab="Distance from peak summit (bp)")
-lines(density(nalm6.runx1.ets.dist), xlim=c(-200,200), col="darkgray", lwd=3)
-lines(density(nalm6.runx1.ebf.dist), xlim=c(-200,200), col="blue", lwd=3)
+plot(density(nalm6.runx1.runx1.dist, bw=12), xlim=c(-200,200), col="red", lwd=3, main="NALM-6 RUNX1", xlab="Motif distance from peak summit (bp)")
+lines(density(nalm6.runx1.ets.dist, bw=12), xlim=c(-200,200), col="darkgray", lwd=3)
+lines(density(nalm6.runx1.ebf.dist, bw=12), xlim=c(-200,200), col="blue", lwd=3)
 abline(v=0, lty=2)
-legend("topright", c("RUNX1", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
+legend("topright", c("RUNX", "ETS", "EBF"), fill=c("red", "darkgray", "blue"))
 
 par(mfrow=c(1,1))
 #dev.off()
